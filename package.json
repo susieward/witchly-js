@@ -1,8 +1,8 @@
 {
   "name": "witchly",
   "version": "1.0.0",
-  "description": "",
-  "main": "lib/index.js",
+  "description": "Tiny, WIP web components framework",
+  "main": "src/index.js",
   "scripts": {
     "serve": "cd sample && webpack-dev-server",
     "test": "echo \"Error: no test specified\" && exit 1"
