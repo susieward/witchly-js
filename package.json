@@ -9,6 +9,10 @@
   },
   "author": "Susie Ward",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/susieward/witchly-js.git"
+  },
   "devDependencies": {
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.72.0",
