@@ -1,6 +1,6 @@
 import { Base } from './base'
 
-class Component extends Base {
+export class Component extends Base {
   static renderFn = null
 
   static init(options = {}) {
@@ -18,15 +18,5 @@ class Component extends Base {
     if (this.classRef.renderFn) {
       this.classRef.renderFn.apply(this, [this])
     }
-  }
-}
-
-export class Witchly {
-  constructor(options) {
-    Witchly.component(options.name, options)
-  }
-
-  static component(name, options, classRef = Component) {
-    customElements.define(name, classRef.init(options))
   }
 }
