@@ -1,4 +1,4 @@
-import { Component } from './core'
+const { Component } = require('./core')
 
 class Witchly {
   constructor(options) {

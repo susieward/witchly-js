@@ -1,6 +1,6 @@
-import { Base } from './base'
+const Base = require('./base')
 
-export class Component extends Base {
+class Component extends Base {
   static renderFn = null
 
   static init(options = {}) {
@@ -19,4 +19,8 @@ export class Component extends Base {
       this.classRef.renderFn.apply(this, [this])
     }
   }
+}
+
+module.exports = {
+  Component
 }

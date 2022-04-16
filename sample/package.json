@@ -9,5 +9,7 @@
   },
   "author": "Susie Ward",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "witchly": "^1.0.1"
+  }
 }

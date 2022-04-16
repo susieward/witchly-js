@@ -1,5 +1,4 @@
-
-export class Base extends HTMLElement {
+class Base extends HTMLElement {
   static ast = null
 
   static init(ast) {
@@ -64,3 +63,5 @@ function createElement(tag, attrs = {}, children = null) {
   }
   return el
 }
+
+module.exports = Base
