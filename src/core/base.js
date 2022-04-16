@@ -20,30 +20,42 @@ class Base extends HTMLElement {
 
   render() {
     if (this.children?.length > 0) this.clear()
-    const els = parse(this.classRef.ast)
-    this.append(...els)
+    const el = this.parse()
+    this.append(el)
   }
 
   getElement(selector) {
     return document.querySelector(selector)
   }
+
+  parse(ast = this.classRef.ast) {
+    return parse(ast, this)
+  }
 }
 
-function parse(ast) {
+function parse(ast, vm) {
   if (!ast) throw new Error('Cannot parse invalid ast value')
   const els = []
   const keys = Object.keys(ast)
   for (const tag of keys) {
-    let { attrs, children } = ast[tag]
+    let { attrs, children, listeners } = ast[tag]
     if (!attrs) attrs = {}
     if (children && typeof(children) === 'object') {
-      const childEls = parse(children)
+      const childEls = parse(children, vm)
       children = childEls
     }
     const el = createElement(tag, attrs, children)
+    if (listeners && typeof listeners === 'object') {
+      for (const event of Object.keys(listeners)) {
+        const callback = listeners[event]
+        el.addEventListener(event, (e) => {
+          return callback.apply(el, [e, vm])
+        })
+      }
+    }
     els.push(el)
   }
-  return els
+  return els.length === 1 ? els[0] : els
 }
 
 function createElement(tag, attrs = {}, children = null) {
