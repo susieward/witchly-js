@@ -10,6 +10,6 @@
   "author": "Susie Ward",
   "license": "ISC",
   "dependencies": {
-    "witchly": "^1.0.3"
+    "witchly": "^1.0.4"
   }
 }
