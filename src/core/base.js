@@ -1,13 +1,25 @@
 class Base extends HTMLElement {
-  static ast = null
+  static _ast = null
+  static _renderFn = null
 
-  static init(ast) {
-    this.ast = ast
-    return this
+  static get ast() {
+    return this._ast
+  }
+
+  static set ast(newVal) {
+    return this._ast = newVal
+  }
+
+  static get renderFn() {
+    return this._renderFn
+  }
+
+  static set renderFn(newVal) {
+    return this._renderFn = newVal
   }
 
   get classRef() {
-    return Base
+    return this.constructor
   }
 
   connectedCallback() {
@@ -22,6 +34,9 @@ class Base extends HTMLElement {
     if (this.children?.length > 0) this.clear()
     const el = this.parse()
     this.append(el)
+    if (this.classRef.renderFn) {
+      this.classRef.renderFn.apply(this, [this])
+    }
   }
 
   getElement(selector) {
@@ -30,6 +45,35 @@ class Base extends HTMLElement {
 
   parse(ast = this.classRef.ast) {
     return parse(ast, this)
+  }
+
+  inject(dep, parentEl) {
+    if (!dep) throw new Error('Dependency must be defined')
+    if (!parentEl) parentEl = this.firstChild
+
+    let resolvedDep = null
+
+    if (typeof dep === 'string') {
+      // attempt to look up custom element definition
+      const ctor = customElements.get(dep)
+      if (ctor) {
+        resolvedDep = new ctor()
+      }
+    } else if (Array.isArray(dep)) {
+      return dep.forEach(item => {
+        return this.inject(item, parentEl)
+      })
+    } else if (typeof dep === 'object') {
+      resolvedDep = this.parse(dep)
+    } else if (typeof dep === 'function') {
+      resolvedDep = dep()
+    } else if (typ)
+    if (!resolvedDep) throw new Error('Could not resolve dependency')
+    try {
+      parentEl.append(resolvedDep)
+    } catch (err) {
+      throw err
+    }
   }
 }
 

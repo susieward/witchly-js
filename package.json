@@ -1,18 +1,17 @@
 {
   "name": "witchly",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Tiny, WIP web components framework",
   "main": "src/index.js",
-  "scripts": {
-    "serve": "cd sample && webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Susie Ward",
   "license": "ISC",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/susieward/witchly-js.git"
   },
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.72.0",

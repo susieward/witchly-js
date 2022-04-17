@@ -1,23 +1,14 @@
 const Base = require('./base')
 
-class Component extends Base {
-  static renderFn = null
-
-  static init(options = {}) {
-    const { ast, render } = options
-    if (render) this.renderFn = render
-    return super.init(ast)
+class Component {
+  constructor(options) {
+    this.dom = class extends Base {}
+    this.dom.ast = options.ast
+    this.dom.renderFn = options.render || null
   }
 
-  get classRef() {
-    return Component
-  }
-
-  render() {
-    super.render()
-    if (this.classRef.renderFn) {
-      this.classRef.renderFn.apply(this, [this])
-    }
+  init() {
+    return this.dom
   }
 }
 
