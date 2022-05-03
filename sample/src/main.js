@@ -1,19 +1,19 @@
-import Witchly from 'witchly'
-import { ast } from './config'
+import Witchly from '../../src/index'
+import Header from './components/Header'
+import App from './components/App'
 
 class MyComponent extends Witchly.Component {
   init() {
-    console.log('hiiii')
+    // console.log('hiiii')
     return super.init()
   }
 }
 
-new Witchly({
-  name: 'witchly-app',
-  ast,
-  render: (vm) => {
-    const el = vm.getElement('.content')
+Witchly.component(Header.name, Header)
 
+new Witchly({
+  ...App,
+  render: (vm) => {
     Witchly.component('my-component', {
       ast: {
         p: {
@@ -27,6 +27,7 @@ new Witchly({
       }
     }, MyComponent)
 
+    const el = vm.getScopedElement('.content')
     vm.inject('my-component', el)
   }
 })
