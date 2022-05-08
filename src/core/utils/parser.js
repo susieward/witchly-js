@@ -12,6 +12,71 @@ function parse(val, vm) {
   return result
 }
 
+function parseTemplate(template, vm) {
+  const parser = new DOMParser()
+  const dom = parser.parseFromString(template, 'text/html')
+  const domChildren = dom.body.children
+  const output = parseElements(domChildren, vm)
+  return output
+}
+
+function parseElements(domEls, vm, parentId = null) {
+  let count = 0
+  const els = []
+  for (const el of domEls) {
+    let id = `${el.localName}-${count}`
+    if (parentId) {
+      id = `${el.localName}-${count}-${parentId}`
+    }
+    el.setAttribute('data-id', id)
+    if (el.hasAttribute('data-if')) {
+      parseConditionalExp(el)
+    }
+    if (el.hasChildNodes()) {
+      const children = parseElements(el.children, vm, id)
+      el.children = children
+    }
+    const attrNames = el.getAttributeNames()
+    const eventAttrs = attrNames.filter(name => {
+      return name?.toLowerCase()?.includes('on')
+    })
+    if (eventAttrs.length > 0) {
+      //console.log(eventAttrs)
+      for (const attr of eventAttrs) {
+        const fn = el.getAttribute(attr)
+        const evt = attr.substring(2)
+        if (Object.keys(vm).includes(fn)) {
+          const callback = vm[fn]
+          el.addEventListener(evt, {
+            handleEvent: function(e) {
+              return callback.apply(vm, [e, vm])
+            }
+          }, false)
+          el.removeAttribute(attr)
+        }
+      }
+    }
+    els.push(el)
+    count++
+  }
+  return els.length === 1 ? els[0] : els
+}
+
+function parseConditionalExp(el) {
+  let value = el.dataset.if
+  if (['undefined', 'null', 'false'].includes(value)) {
+    value = false
+  }
+  if (value === false) {
+    let style = 'display: none;'
+    if (el.hasAttribute('style')) {
+      style = `${el.getAttribute('style')}; ${style}`
+    }
+    el.setAttribute('style', style)
+  }
+  return el
+}
+
 function parseAST(ast, vm) {
   const els = []
   const keys = Object.keys(ast)
@@ -23,6 +88,9 @@ function parseAST(ast, vm) {
       children = childEls
     }
     const el = createElement(tag, attrs, children)
+    if (el.hasAttribute('data-if')) {
+      parseConditionalExp(el)
+    }
     if (listeners && typeof listeners === 'object') {
       for (const event of Object.keys(listeners)) {
         const callback = listeners[event]
@@ -52,63 +120,6 @@ function createElement(tag, attrs = {}, children = null) {
     }
   }
   return el
-}
-
-function parseTemplate(template, vm) {
-  const parser = new DOMParser()
-  const dom = parser.parseFromString(template, 'text/html')
-  const domChildren = dom.body.children
-  const output = parseElements(domChildren, vm)
-  return output
-}
-
-function parseElements(domEls, vm, parentId = null) {
-  let count = 0
-  const els = []
-  for (const el of domEls) {
-    let id = `${el.localName}-${count}`
-    if (parentId) {
-      id = `${el.localName}-${count}-${parentId}`
-    }
-    el.setAttribute('data-id', id)
-    if (el.hasAttribute('data-if')) {
-      const value = JSON.parse(el.dataset.if)
-      if (value === false) {
-        let style = 'display: none;'
-        if (el.hasAttribute('style')) {
-          style = `${el.getAttribute('style')}; ${style}`
-        }
-        el.setAttribute('style', style)
-      }
-    }
-    if (el.hasChildNodes()) {
-      const children = parseElements(el.children, vm, id)
-      el.children = children
-    }
-    const attrNames = el.getAttributeNames()
-    const eventAttrs = attrNames.filter(name => {
-      return name?.toLowerCase()?.includes('on')
-    })
-    if (eventAttrs.length > 0) {
-      for (const attr of eventAttrs) {
-        const fn = el.getAttribute(attr)
-        const evt = attr.substring(2)
-        const props = Object.keys(vm)
-        if (Object.keys(vm).includes(fn)) {
-          const callback = vm[fn]
-          el.addEventListener(evt, {
-            handleEvent: function(e) {
-              return callback.apply(vm, [e, vm])
-            }
-          }, false)
-          el.removeAttribute(attr)
-        }
-      }
-    }
-    els.push(el)
-    count++
-  }
-  return els.length === 1 ? els[0] : els
 }
 
 function buildAST(el) {

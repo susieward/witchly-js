@@ -4,12 +4,23 @@ class Witchly {
   static Component = Component
 
   constructor(options) {
-    Witchly.component(options.name, options)
+    const ctor = Witchly.component(options)
+    const el = document.getElementById('app')
+    el.replaceWith(new ctor())
   }
 
-  static component(name, options, classRef = Component) {
+  static components(comps = [], classRef = Component) {
+    if (comps?.length > 0) {
+      for (const comp of comps) {
+        this.component(comp, classRef)
+      }
+    }
+  }
+
+  static component(options, classRef = Component) {
     const comp = new classRef(options)
-    customElements.define(name, comp.init())
+    customElements.define(comp.name, comp.init())
+    return customElements.get(comp.name)
   }
 }
 

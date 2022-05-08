@@ -1,65 +1,57 @@
-const Header = {
-  name: 'app-header',
-  data() {
-    return {
-      title: 'witchly.js: configuration-driven web components',
+
+export default class Header {
+  constructor() {
+    this.name = 'app-header'
+    this.data = () => ({
+      title: 'minimal, flexible web components',
       inputVal: '',
-      color: '#745fb5',
-      colors: ['pink', 'linen', 'skyblue', 'turquoise', '#745fb5']
-    }
-  },
+      color: '#745fb5'
+    })
+  }
+
+  render() {
+    this.input.placeholder = 'Type something'
+  }
+
+  get input() {
+    return this.getScopedElement('#input')
+  }
+
+  get clearable() {
+    return (this.input?.value?.length > 0)
+  }
+
   get template() {
-    const clearable = (this.inputVal.length > 0)
     return `
       <header id="header">
-        <h1 style="color: ${this.color}; font-weight: 300; padding: 0 28px; font-size: 28px;">
-          <span>${this.title}</span>
-          <span>${this.inputVal}</span>
-          <input id="input" type="text" oninput="setInputVal" value="${this.inputVal}" />
-          <button onclick="updateMessage">update title</button>
-          <button data-if="${clearable}" onclick="clearMessage">clear</button>
-        </h1>
-        <div>
-        ${this.colors.map(color => {
-          return `<span style="color: ${color}">${color}</span>`
-        })}
-        <input id="new-color" type="text" value="" />
-        <button onclick="addColor">add color</button>
-        <button onclick="updateColor">update color</button>
-        <span>
-          Current color: <span style="color: ${this.color}">${this.color}</span>
-          </span>
+      <div style="display: grid; justify-content: flex-start; grid-auto-flow: column; align-content: center; grid-column-gap: 15px">
+        <h1 style="color: ${this.color}">witchly.js</h1> //
+        <h2 style="color: #aaa">${this.title}</h2>
         </div>
-      </header>
-    `
-  },
-  getRandomColor() {
-    return this.colors[Math.floor(Math.random()*this.colors.length)]
-  },
-  updateColor() {
-    this.color = this.getRandomColor()
-  },
-  updateMessage() {
-    const input = this.getScopedElement('#input')
-    const message = input.value
-    this.title = message
-  },
-  addColor() {
-    const input = this.getScopedElement('#new-color')
-    if (input.value?.length > 0) {
-      this.colors.push(input.value)
-    }
-  },
-  clearMessage() {
-    const input = this.getScopedElement('#input')
-    input.value = ''
-    this.inputVal = ""
-    this.title = 'witchly.js: configuration-driven web components'
-  },
+        <div style="display: grid; margin-left: auto; justify-content: flex-end; align-content: center; grid-auto-flow: column; grid-column-gap: 15px">
+        <span style="font-family: Menlo">${this.inputVal}</span>
+        <input id="input" type="text" oninput="setInputVal" value="" />
+        <button onclick="updateTitle">update title</button>
+        <button data-if="${this.clearable}" onclick="clear">
+          reset
+        </button>
+        </div>
+      </header>`
+  }
+
+  updateTitle() {
+    this.title = this.inputVal
+  }
+
+  clear() {
+    this.input.value = ''
+    this.inputVal = ''
+    this.input.placeholder = 'Type something'
+    this.title = 'minimal, flexible web components'
+  }
+
   setInputVal(e) {
     if (e.isComposing) return
     this.inputVal = e.target.value
   }
 }
-
-export default Header

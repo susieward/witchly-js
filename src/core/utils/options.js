@@ -1,24 +1,37 @@
 
 function initOptions(obj, context, callback) {
-  if (typeof obj['data'] === 'function') {
-    const data = obj.data()
-    context.$data = observe(data, context, callback)
+  let descObj = Object.getOwnPropertyDescriptors(obj)
+  const dataset = Object.getOwnPropertyDescriptors(context.dataset)
+  if (obj.constructor.name !== 'Object') {
+    descObj = { ...descObj, ...Object.getOwnPropertyDescriptors(obj.constructor.prototype) }
   }
-  const methods = Object.keys(obj).filter(k => {
-    return (k !== 'data') && (k !== 'template') && typeof obj[k] === 'function'
-  })
-  if (methods.length > 0) {
-    const methodConfigs = methods.map(key => {
-      return [`${key}`, {
-        value: obj[`${key}`].bind(context),
-        enumerable: true
-      }]
-    })
-    Object.defineProperties(context, { ...Object.fromEntries(methodConfigs) })
+  descObj = { ...descObj, ...dataset }
+
+  for (const key of Object.keys(descObj)) {
+    const desc = descObj[key]
+      if (desc.hasOwnProperty('value') && typeof desc['value'] === 'function') {
+        if (key === 'data') {
+          const data = obj.data()
+          context.$data = observe(data, context, callback)
+        } else {
+          Object.defineProperty(context, key, {
+            value: obj[`${key}`].bind(context),
+            enumerable: true
+          })
+        }
+      } else {
+        Object.defineProperty(context, key, desc)
+      }
   }
-  if (obj.hasOwnProperty('template')) {
-    Object.defineProperty(context, 'template', Object.getOwnPropertyDescriptor(obj, 'template'))
+  if (descObj.hasOwnProperty('template') && !context.hasOwnProperty('template')) {
+    const desc = descObj['template']
+    Object.defineProperty(context, 'template', desc)
   }
+  if (descObj.hasOwnProperty('ast') && !context.hasOwnProperty('ast')) {
+    const desc = descObj['ast']
+    Object.defineProperty(context, 'ast', desc)
+  }
+
   return context
 }
 
@@ -44,10 +57,10 @@ function observe(obj, target, callback = null) {
 function handler(context, callback, ref = null) {
   return {
     get(target, prop) {
-			if (['[object Object]', '[object Array]'].indexOf(Object.prototype.toString.call(target[prop])) > -1) {
-				return new Proxy(target[prop], handler(context, callback, prop))
-			}
-			return target[prop]
+      if (['[object Object]', '[object Array]'].indexOf(Object.prototype.toString.call(target[prop])) > -1) {
+        return new Proxy(target[prop], handler(context, callback, prop))
+      }
+      return target[prop]
 		},
     set(target, prop, value) {
       let newVal = value

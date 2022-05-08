@@ -1,12 +1,31 @@
 const Base = require('./base')
-const { initOptions } = require('./reactivity-utils')
+const { initOptions } = require('./utils/options')
+const { update } = require('./utils/reactivity')
 
 class Component {
   constructor(options) {
-    this.dom = createClass(options)
+    if (options.constructor.name === 'Function') {
+      options = new options()
+    }
+    if (options.hasOwnProperty('components')) {
+      Component.register(options.components)
+    }
+    this.name = options.name
+    this.ctor = createClass(options)
   }
+
+  static register(compObj) {
+    const compNames = Object.keys(compObj)
+    if (compNames.length > 0) {
+      for (const name of compNames) {
+        const comp = new this(compObj[name])
+        customElements.define(comp.name, comp.init())
+      }
+    }
+  }
+
   init() {
-    return this.dom
+    return this.ctor
   }
 }
 
@@ -15,13 +34,13 @@ function createClass(options) {
     constructor() {
       super()
       this.options = options
-      if (this.options && !this.options.ast) {
+      if (this.options) {
         initOptions(options, this, this.update)
       }
     }
 
-    get ast() {
-      return this.options?.ast
+    get _ast() {
+      return this.ast
     }
 
     get renderFn() {
@@ -38,46 +57,9 @@ function createClass(options) {
         this.renderFn.apply(this, [this])
       }
     }
+
     update(prop, newVal, oldVal) {
       return update(prop, newVal, oldVal, this)
-    }
-  }
-}
-
-function update(prop, newVal, oldVal, vm) {
-  const dom = vm.parse(vm.template)
-  const oldDom = vm.firstChild
-  const args = [null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null]
-
-  let exp = `.//*[contains(text(),"${newVal}")] | .//*[@*[contains(., "${newVal}") and not(name()="data-id" or name()="value" or name()="id")]] | .//*[@data-if]`
-
-  const output = document.evaluate(exp, dom, ...args)
-  let el = output.iterateNext()
-  let matches = []
-
-  while (el) {
-    const currExp = `.//*[name()="${el.localName}" and @data-id="${el.dataset.id}"]`
-    const domOutput = document.evaluate(currExp, vm.firstChild, ...args)
-    let match = domOutput.iterateNext()
-    if (match && !match.isEqualNode(el)) {
-      matches.push({ newEl: el, oldEl: match })
-    }
-    el = output.iterateNext()
-  }
-  if (matches.length > 0) {
-    matches = matches.reverse()
-    for (const [index, obj] of matches.entries()) {
-      const { oldEl, newEl } = obj
-      if (index > 0) {
-        const prev = matches[index - 1]
-        if (oldEl.contains(prev.newEl)) continue
-      }
-      oldEl.replaceWith(newEl)
-    }
-  } else {
-    const domChanged = !oldDom.isEqualNode(dom)
-    if (domChanged) {
-      vm.firstChild.replaceWith(dom)
     }
   }
 }

@@ -1,33 +1,19 @@
 import Witchly from 'witchly'
-import Header from './components/Header'
 import App from './components/App'
+import ASTComponent from './components/ASTExample'
 
 class MyComponent extends Witchly.Component {
   init() {
-    // console.log('hiiii')
+    console.log('hi!')
     return super.init()
   }
 }
 
-Witchly.component(Header.name, Header)
-
 new Witchly({
   ...App,
   render: (vm) => {
-    Witchly.component('my-component', {
-      ast: {
-        p: {
-          attrs: { style: 'color: #8066cc' },
-          children: 'hello from a render function!'
-        }
-      },
-      render: (vm) => {
-        vm.style = 'color: blue'
-        vm.append('whoa')
-      }
-    }, MyComponent)
-
+    Witchly.component(ASTComponent, MyComponent)
     const el = vm.getScopedElement('.content')
-    vm.inject('my-component', el)
+    vm.inject('ast-component', el)
   }
 })

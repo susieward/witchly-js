@@ -1,4 +1,4 @@
-const { parse } = require('./parser-utils')
+const { parse } = require('./utils/parser')
 
 class Base extends HTMLElement {
   constructor() {
@@ -16,7 +16,7 @@ class Base extends HTMLElement {
 
   $render() {
     if (this.loaded) this.clear()
-    const val = this._template || this.ast
+    const val = this._template || this._ast
     const el = this.parse(val)
     this.append(el)
     if (!this.loaded) this.loaded = true
