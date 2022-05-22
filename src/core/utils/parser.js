@@ -13,10 +13,10 @@ function parse(val, vm) {
 }
 
 function parseTemplate(template, vm) {
-  const parser = new DOMParser()
-  const dom = parser.parseFromString(template, 'text/html')
-  const domChildren = dom.body.children
-  const output = parseElements(domChildren, vm)
+  const temp = document.createElement('template')
+  temp.innerHTML = template
+  const domChildren = temp.content.cloneNode(true)
+  const output = parseElements(domChildren.children, vm)
   return output
 }
 
@@ -41,7 +41,6 @@ function parseElements(domEls, vm, parentId = null) {
       return name?.toLowerCase()?.includes('on')
     })
     if (eventAttrs.length > 0) {
-      //console.log(eventAttrs)
       for (const attr of eventAttrs) {
         const fn = el.getAttribute(attr)
         const evt = attr.substring(2)
@@ -153,7 +152,4 @@ function buildAST(el) {
   return ast
 }
 
-module.exports = {
-  parse,
-  buildAST
-}
+module.exports = { parse }

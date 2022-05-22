@@ -1,19 +1,9 @@
 import Witchly from 'witchly'
-import App from './components/App'
-import ASTComponent from './components/ASTExample'
-
-class MyComponent extends Witchly.Component {
-  init() {
-    console.log('hi!')
-    return super.init()
-  }
-}
+import App from './App'
+import './main.css'
+import router from './router'
 
 new Witchly({
-  ...App,
-  render: (vm) => {
-    Witchly.component(ASTComponent, MyComponent)
-    const el = vm.getScopedElement('.content')
-    vm.inject('ast-component', el)
-  }
+  render: () => App,
+  router
 })

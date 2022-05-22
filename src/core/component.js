@@ -1,67 +1,53 @@
 const Base = require('./base')
-const { initOptions } = require('./utils/options')
-const { update } = require('./utils/reactivity')
+const { initOptions, preprocess } = require('./utils/options')
 
-class Component {
-  constructor(options) {
-    if (options.constructor.name === 'Function') {
-      options = new options()
-    }
-    if (options.hasOwnProperty('components')) {
-      Component.register(options.components)
-    }
-    this.name = options.name
-    this.ctor = createClass(options)
+function createComponent(_options, root = null) {
+  const options = preprocess(_options)
+  if (options.hasOwnProperty('components')) {
+    registerComponents(options, root)
   }
-
-  static register(compObj) {
-    const compNames = Object.keys(compObj)
-    if (compNames.length > 0) {
-      for (const name of compNames) {
-        const comp = new this(compObj[name])
-        customElements.define(comp.name, comp.init())
-      }
-    }
+  const comp = {
+    name: options.name,
+    ctor: createClass(options, root)
   }
-
-  init() {
-    return this.ctor
-  }
+  register(comp)
+  return comp
 }
 
-function createClass(options) {
+async function registerComponents(options, root = null) {
+  const values = Object.values(options.components)
+  const comps = await Promise.all(values.map(comp => {
+    return registerComponent(comp, root)
+  }))
+  options.components = comps
+  return options
+}
+
+async function registerComponent(config, root) {
+  const options = await Promise.resolve(preprocess(config))
+  return createComponent(options, root)
+}
+
+function register(comp) {
+  customElements.define(comp.name, comp.ctor)
+  return customElements.get(comp.name)
+}
+
+function createClass(options, root = null) {
   return class extends Base {
     constructor() {
       super()
-      this.options = options
-      if (this.options) {
-        initOptions(options, this, this.update)
+      initOptions(options, this, this._update)
+      if (this.created) {
+        this.created.apply(this, [this])
       }
+      this.attachShadow({ mode: 'open' })
     }
 
-    get _ast() {
-      return this.ast
-    }
-
-    get renderFn() {
-      return this.options?.render
-    }
-
-    get _template() {
-      return this.template
-    }
-
-    $render() {
-      super.$render()
-      if (this.renderFn) {
-        this.renderFn.apply(this, [this])
-      }
-    }
-
-    update(prop, newVal, oldVal) {
-      return update(prop, newVal, oldVal, this)
+    get $router() {
+      return root ? root.router : null
     }
   }
 }
 
-module.exports = Component
+module.exports = { createComponent, registerComponent }

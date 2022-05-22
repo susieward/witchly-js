@@ -1,20 +1,58 @@
 
+const Title = {
+  name: 'app-title',
+  data: () => ({
+    color: '#745fb5',
+    title: 'lightweight, hyper-flexible web components'
+  }),
+  props: {
+    text: {
+      type: String
+    }
+  },
+  get template() {
+    return `
+      <div class="title-container">
+        <h1 onclick="home" style="color: ${this.color}">witchly.js</h1> //
+        <h2 style="color: #aaa">${this.title}</h2>
+        <button onclick="about">about</button>
+      </div>
+    `
+  },
+  connected() {
+    if (this.text) {
+      this.title = this.text
+    }
+  },
+  about() {
+    return this.$router.push('/about')
+  },
+  home() {
+    return this.$router.push('/')
+  }
+}
+
 export default class Header {
   constructor() {
     this.name = 'app-header'
-    this.data = () => ({
-      title: 'minimal, flexible web components',
-      inputVal: '',
-      color: '#745fb5'
-    })
+    this.components = { Title }
+    this.data = () => ({ inputVal: '' })
+    this.divStyle =  `
+        display: grid;
+        margin-left: auto;
+        justify-content: flex-end;
+        align-content: center;
+        grid-auto-flow: column;
+        grid-column-gap: 15px
+    `
   }
 
-  render() {
+  connected() {
     this.input.placeholder = 'Type something'
   }
 
   get input() {
-    return this.getScopedElement('#input')
+    return this.$querySelector('#input')
   }
 
   get clearable() {
@@ -24,30 +62,21 @@ export default class Header {
   get template() {
     return `
       <header id="header">
-      <div style="display: grid; justify-content: flex-start; grid-auto-flow: column; align-content: center; grid-column-gap: 15px">
-        <h1 style="color: ${this.color}">witchly.js</h1> //
-        <h2 style="color: #aaa">${this.title}</h2>
+        <app-title data-text="${this.inputVal}"></app-title>
+        <div style="${this.divStyle}">
+          <input id="input" type="text" oninput="setInputVal" value="" />
+          <button data-if="${this.clearable}" onclick="clear">
+            reset
+          </button>
         </div>
-        <div style="display: grid; margin-left: auto; justify-content: flex-end; align-content: center; grid-auto-flow: column; grid-column-gap: 15px">
-        <span style="font-family: Menlo">${this.inputVal}</span>
-        <input id="input" type="text" oninput="setInputVal" value="" />
-        <button onclick="updateTitle">update title</button>
-        <button data-if="${this.clearable}" onclick="clear">
-          reset
-        </button>
-        </div>
-      </header>`
-  }
-
-  updateTitle() {
-    this.title = this.inputVal
+      </header>
+    `
   }
 
   clear() {
     this.input.value = ''
     this.inputVal = ''
     this.input.placeholder = 'Type something'
-    this.title = 'minimal, flexible web components'
   }
 
   setInputVal(e) {

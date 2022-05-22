@@ -30,12 +30,14 @@ export default class Content {
           </p>
           <input id="new-color" type="text" value="" />
           <button onclick="addColor">add color</button>
-
           <p><button onclick="updateColor">random text color</button></p>
-
         </div>
       </div>
     `
+  }
+
+  get input() {
+    return this.$querySelector('#new-color')
   }
 
   getRandomColor() {
@@ -51,9 +53,8 @@ export default class Content {
   }
 
   addColor() {
-    const input = this.getScopedElement('#new-color')
-    if (input.value?.length > 0) {
-      this.colors.push(input.value)
+    if (this.input.value?.length > 0) {
+      this.colors.push(this.input.value)
     }
   }
 }

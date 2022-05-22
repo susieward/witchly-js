@@ -1,66 +1,59 @@
 const { parse } = require('./utils/parser')
+const { update } = require('./utils/reactivity')
 
 class Base extends HTMLElement {
-  constructor() {
-    super()
-    this.loaded = false
-  }
-
   connectedCallback() {
-    this.$render()
+    this.render()
   }
 
-  clear() {
-    this.replaceChildren()
+  get _domTemplate() {
+    return this.#_parse(this._template)
   }
 
-  $render() {
-    if (this.loaded) this.clear()
-    const val = this._template || this._ast
-    const el = this.parse(val)
-    this.append(el)
-    if (!this.loaded) this.loaded = true
+  get _template() {
+    return this.template
   }
 
-  getElement(selector) {
-    return document.querySelector(selector)
+  render() {
+    const style = document.styleSheets[0].ownerNode
+    this.shadowRoot.append(this._domTemplate, style.cloneNode(true))
+    if (this.connected) {
+      this.#onConnected()
+    }
   }
 
-  getScopedElement(selector) {
-    return this.querySelector(selector)
+  $emit(evtName, ...args) {
+    const evt = new CustomEvent(evtName, {
+      bubbles: true,
+      composed: true,
+      detail: args.length === 1 ? args[0] : args
+    })
+    return this.dispatchEvent(evt)
   }
 
-  parse(val, context = this) {
+  $append(...args) {
+    this.shadowRoot.append(...args)
+  }
+
+  $querySelector(...args) {
+    return this.shadowRoot.querySelector(...args)
+  }
+
+  async #onConnected() {
+    const undefinedElements = this.shadowRoot.querySelectorAll(':not(:defined)')
+    const promises = [...undefinedElements].map(el => {
+      return customElements.whenDefined(el.localName)
+    })
+    await Promise.all(promises)
+    this.connected.apply(this, [this])
+  }
+
+  _update(prop, newVal, oldVal) {
+    return update(prop, newVal, oldVal, this)
+  }
+
+  #_parse(val, context = this) {
     return parse(val, context)
-  }
-
-  inject(dep, parentEl) {
-    if (!dep) throw new Error('Dependency must be defined')
-    if (!parentEl) parentEl = this.firstChild
-
-    let resolvedDep = null
-
-    if (typeof dep === 'string') {
-      // attempt to look up custom element definition
-      const ctor = customElements.get(dep)
-      if (ctor) {
-        resolvedDep = new ctor()
-      }
-    } else if (Array.isArray(dep)) {
-      return dep.forEach(item => {
-        return this.inject(item, parentEl)
-      })
-    } else if (typeof dep === 'object') {
-      resolvedDep = this.parse(dep)
-    } else if (typeof dep === 'function') {
-      resolvedDep = dep()
-    }
-    if (!resolvedDep) throw new Error('Could not resolve dependency')
-    try {
-      parentEl.append(resolvedDep)
-    } catch (err) {
-      throw err
-    }
   }
 }
 

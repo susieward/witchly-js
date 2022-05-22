@@ -1,28 +1,38 @@
+const ListItems = () => import('./ListItems')
 
 export default function Sidenav() {
   this.name = 'app-sidenav'
-  this.data = function() {
-    return {
-      items: ['I am a list item!']
-    }
+  this.components = { ListItems }
+
+  this.data = () => ({
+    items: ['test']
+  })
+
+  this.addListItem = function(e, vm, text = 'hello!') {
+    this.items.push(text)
   }
 
-  this.addListItem = function() {
-    this.items.push('hello!')
+  this.updateItems = function(e) {
+    const index = e.detail
+    this.items.splice(index, 1)
   }
 
   return {
     ...this,
+    connected() {
+      this.addListItem()
+    },
     get template() {
       return `
-        <aside class="sidenav">
-          <button onclick="addListItem">
-            click me
-          </button>
-          <ul>
-            ${[...this.items.map(item => `<li>${item}</li>`)].join('')}
-          </ul>
-        </aside>
+          <aside class="sidenav">
+            <button onclick="addListItem">
+              click me
+            </button>
+            <list-items
+              onremoved="updateItems"
+              data-items="${this.items}">
+            </list-items>
+          </aside>
       `
     }
   }

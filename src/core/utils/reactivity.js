@@ -1,13 +1,8 @@
 
 function update(prop, newVal, oldVal, vm) {
-  const parseVal = vm.template || vm.ast
-  // construct "new" DOM by re-parsing component template/ast
-  const newDom = vm.parse(parseVal)
-  // current DOM state
-  const currDom = vm.firstChild
-
-  const exp = buildXPathExpression(newVal)
-  let matches = getChangedNodes(exp, newDom, currDom)
+  const newDom = vm._domTemplate
+  const currDom = vm.shadowRoot.firstChild
+  let matches = getChangedNodes(newVal, newDom, currDom)
 
   if (matches.length > 0) {
     matches = matches.reverse()
@@ -22,13 +17,15 @@ function update(prop, newVal, oldVal, vm) {
   } else {
     const domChanged = !currDom.isEqualNode(newDom)
     if (domChanged) {
-      vm.firstChild.replaceWith(newDom)
+      currDom.replaceWith(newDom)
     }
   }
 }
 
-function getChangedNodes(exp, newDom, currDom) {
+function getChangedNodes(newVal, newDom, currDom) {
+  const exp = buildXPathExpression(newVal)
   const newDomResults = getXPathResults(exp, newDom)
+
   let el = newDomResults.iterateNext()
   const matches = []
 
@@ -47,17 +44,12 @@ function getChangedNodes(exp, newDom, currDom) {
 function buildXPathExpression(newVal) {
   const excludedAttrs = ['value', 'id', 'data-id']
   const excludedAttrNames = excludedAttrs.map(attr => `name()="${attr}"`).join(' or ')
-
-  // retrieve any elements with text node children that match the new value
+  // retrieve any elements with text that matches the new value
   const innerTextExp = `.//*[contains(text(),"${newVal}")]`
-
-  // retrieve any elements with attribute values that contain the new value
-  // (excluding specified attributes)
+  // retrieve any elements with non-excluded attribute values that contain the new value
   const attrValExp = `.//*[@*[contains(., "${newVal}") and not(${excludedAttrNames})]]`
-
   // retrieve any elements with conditional data attributes to check for changes
   const conditionalExp = `.//*[@data-if]`
-
   // join results
   const exp = `${innerTextExp} | ${attrValExp} | ${conditionalExp}`
   return exp

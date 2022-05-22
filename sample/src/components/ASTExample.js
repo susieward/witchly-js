@@ -7,10 +7,14 @@ const ASTComponent = {
       showMessage: false
     }
   },
+  connected() {
+    this.style = 'color: blue'
+    this.$append('whoa')
+  },
   get buttonText() {
     return this.showMessage ? 'hide message' : 'show message'
   },
-  get ast() {
+  get template() {
     return {
       p: {
         children: [
@@ -36,10 +40,6 @@ const ASTComponent = {
         ]
       }
     }
-  },
-  render() {
-    this.style = 'color: blue'
-    this.append('whoa')
   }
 }
 

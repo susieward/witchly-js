@@ -1,7 +1,9 @@
 const Base = require('./base')
-const Component = require('./component')
+const { createComponent } = require('./component')
+const Router = require('./router')
 
 module.exports = {
-  Component,
-  Base
+  createComponent,
+  Base,
+  Router
 }

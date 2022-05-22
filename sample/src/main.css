@@ -64,6 +64,14 @@ h2 {
   padding: 20px 28px;
 }
 
+.title-container {
+  display: grid;
+  justify-content: flex-start;
+  grid-auto-flow: column;
+  align-content: center;
+  grid-column-gap: 15px;
+}
+
 .main {
   display: grid;
   justify-content: center;

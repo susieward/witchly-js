@@ -8,10 +8,26 @@ module.exports = {
     path: path.resolve(__dirname, "./dist"),
     filename: "main.bundle.js"
   },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    }
+  },
   devServer: {
     port: 8080,
     hot: true,
     historyApiFallback: true
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader']
+      }
+    ]
+  },
+  experiments: {
+    topLevelAwait: true
   },
   plugins: [
     new HtmlWebpackPlugin({
