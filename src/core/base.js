@@ -2,58 +2,53 @@ const { parse } = require('./utils/parser')
 const { update } = require('./utils/reactivity')
 
 class Base extends HTMLElement {
-  connectedCallback() {
-    this.render()
-  }
-
   get _domTemplate() {
-    return this.#_parse(this._template)
+    return parse(this.template, this)
   }
 
-  get _template() {
-    return this.template
+  get $router() {
+    return this._root?.router
   }
 
-  render() {
-    const style = document.styleSheets[0].ownerNode
-    this.shadowRoot.append(this._domTemplate, style.cloneNode(true))
-    if (this.connected) {
-      this.#onConnected()
-    }
+  connectedCallback() {
+    this._render()
   }
 
-  $emit(evtName, ...args) {
-    const evt = new CustomEvent(evtName, {
-      bubbles: true,
-      composed: true,
-      detail: args.length === 1 ? args[0] : args
-    })
-    return this.dispatchEvent(evt)
+  attributeChangedCallback(name, oldVal, newVal) {
+    this._update(name, newVal, oldVal)
   }
 
-  $append(...args) {
-    this.shadowRoot.append(...args)
-  }
-
-  $querySelector(...args) {
-    return this.shadowRoot.querySelector(...args)
-  }
-
-  async #onConnected() {
-    const undefinedElements = this.shadowRoot.querySelectorAll(':not(:defined)')
-    const promises = [...undefinedElements].map(el => {
-      return customElements.whenDefined(el.localName)
-    })
-    await Promise.all(promises)
-    this.connected.apply(this, [this])
+  _render() {
+    this.shadowRoot.append(this._domTemplate)
   }
 
   _update(prop, newVal, oldVal) {
     return update(prop, newVal, oldVal, this)
   }
 
-  #_parse(val, context = this) {
-    return parse(val, context)
+  $emit(evtName, ...args) {
+    const evt = new CustomEvent(evtName, {
+      bubbles: true,
+      composed: true,
+      detail: args?.length === 1 ? args[0] : args
+    })
+    return this.dispatchEvent(evt)
+  }
+
+  $append(...args) {
+    return this.shadowRoot.append(...args)
+  }
+
+  $querySelector(...args) {
+    return this.shadowRoot.querySelector(...args)
+  }
+
+  $querySelectorAll(...args) {
+    return this.shadowRoot.querySelectorAll(...args)
+  }
+
+  $go(args) {
+    return this.$router.push(args)
   }
 }
 

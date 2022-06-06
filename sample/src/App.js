@@ -1,18 +1,23 @@
-const Header = () => import('@/components/Header')
+import Header from '@/components/Header'
+import Nav from '@/components/Sidenav'
 
-export default function App() {
-  this.name = 'witchly-app'
-  this.components = { Header }
+export default class App {
+  name = 'witchly-app'
+  navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' }
+  ]
+  components = { Header, Sidenav: Nav(this.navLinks) }
 
-  return {
-    ...this,
-    get template() {
-      return `
-          <div id="app">
-            <app-header></app-header>
-            <witchly-router></witchly-router>
-          </div>
-      `
-    }
+  get template() {
+    return (`
+      <div id="app">
+        <app-header></app-header>
+        <main class="main">
+          <app-sidenav></app-sidenav>
+          <witchly-router></witchly-router>
+        </main>
+      </div>
+    `)
   }
 }

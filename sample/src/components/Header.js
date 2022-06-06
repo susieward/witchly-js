@@ -1,70 +1,42 @@
 
-const Title = {
-  name: 'app-title',
-  data: () => ({
-    color: '#745fb5',
-    title: 'lightweight, hyper-flexible web components'
-  }),
-  props: {
-    text: {
-      type: String
-    }
-  },
-  get template() {
-    return `
-      <div class="title-container">
-        <h1 onclick="home" style="color: ${this.color}">witchly.js</h1> //
-        <h2 style="color: #aaa">${this.title}</h2>
-        <button onclick="about">about</button>
-      </div>
-    `
-  },
-  connected() {
-    if (this.text) {
-      this.title = this.text
-    }
-  },
-  about() {
-    return this.$router.push('/about')
-  },
-  home() {
-    return this.$router.push('/')
-  }
-}
-
 export default class Header {
-  constructor() {
-    this.name = 'app-header'
-    this.components = { Title }
-    this.data = () => ({ inputVal: '' })
-    this.divStyle =  `
-        display: grid;
-        margin-left: auto;
-        justify-content: flex-end;
-        align-content: center;
-        grid-auto-flow: column;
-        grid-column-gap: 15px
-    `
+  name = 'app-header'
+  state = () => ({ textVal: '' })
+  defaultTitle = 'lightweight, hyper-flexible web components'
+
+  components = {
+    Title:  class Title {
+      name = 'app-title'
+      color = '#745fb5'
+
+      static get observedAttributes() {
+        return ['text']
+      }
+
+      get template() {
+        return `
+          <div class="title-container">
+            <h1 onclick="$go('/')" style="color: ${this.color}">
+              witchly.js
+            </h1>
+          <h2 style="color: #aaa">${this.text}</h2>
+        </div>`
+      }
+    }
   }
 
-  connected() {
-    this.input.placeholder = 'Type something'
-  }
-
-  get input() {
-    return this.$querySelector('#input')
-  }
-
-  get clearable() {
-    return (this.input?.value?.length > 0)
+  connectedCallback() {
+    this.inputEl.placeholder = 'Update title text'
   }
 
   get template() {
     return `
       <header id="header">
-        <app-title data-text="${this.inputVal}"></app-title>
-        <div style="${this.divStyle}">
-          <input id="input" type="text" oninput="setInputVal" value="" />
+        <app-title
+          text="${this.textVal || this.defaultTitle}">
+        </app-title>
+        <div class="header-right">
+          <input id="input" type="text" :value="textVal" />
           <button data-if="${this.clearable}" onclick="clear">
             reset
           </button>
@@ -73,14 +45,16 @@ export default class Header {
     `
   }
 
-  clear() {
-    this.input.value = ''
-    this.inputVal = ''
-    this.input.placeholder = 'Type something'
+  get inputEl() {
+    return this.$querySelector('#input')
   }
 
-  setInputVal(e) {
-    if (e.isComposing) return
-    this.inputVal = e.target.value
+  get clearable() {
+    return this.textVal.length > 0
+  }
+
+  clear() {
+    this.textVal = ''
+    this.inputEl.placeholder = 'Type something'
   }
 }

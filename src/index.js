@@ -1,16 +1,18 @@
-const { createComponent, Router } = require('./core')
+const { ComponentFactory, Router } = require('./core')
 
 class Witchly {
   constructor(options) {
-    this.router = new Router(options.router)
+    if (options.router) {
+      this.router = new Router(options.router, this)
+    }
     const ctor = Witchly.component(options.render(), this)
     const el = document.getElementById('app')
     el.replaceWith(new ctor())
   }
 
   static component(options, root) {
-    const comp = createComponent(options, root)
-    return customElements.get(comp.name)
+    const comp = ComponentFactory.create(options, root)
+    return comp._ctor
   }
 }
 

@@ -1,7 +1,7 @@
 {
   "name": "witchly",
-  "version": "1.0.7",
-  "description": "Lightweight, hyper-flexible web components framework",
+  "version": "1.0.8",
+  "description": "Lightweight, hyper-flexible, web components-based framework",
   "main": "src/index.js",
   "author": "Susie Ward",
   "license": "ISC",

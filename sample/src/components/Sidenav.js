@@ -1,39 +1,35 @@
-const ListItems = () => import('./ListItems')
 
-export default function Sidenav() {
-  this.name = 'app-sidenav'
-  this.components = { ListItems }
+const Nav = (links) => {
+  const name = 'app-sidenav'
 
-  this.data = () => ({
-    items: ['test']
-  })
-
-  this.addListItem = function(e, vm, text = 'hello!') {
-    this.items.push(text)
+  const createLinks = () => {
+    return links.map(link => {
+      return `<span class="link" onclick="$go(${link.path})">${link.name}</span>`
+    }).join('')
   }
 
-  this.updateItems = function(e) {
-    const index = e.detail
-    this.items.splice(index, 1)
-  }
-
-  return {
-    ...this,
-    connected() {
-      this.addListItem()
-    },
-    get template() {
-      return `
-          <aside class="sidenav">
-            <button onclick="addListItem">
-              click me
-            </button>
-            <list-items
-              onremoved="updateItems"
-              data-items="${this.items}">
-            </list-items>
-          </aside>
-      `
+  const styles = (`
+    .link {
+      color: var(--accent-color);
+      cursor: pointer;
+      margin-right: auto;
     }
-  }
+    .sidenav h2 {
+      display: inline-block;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 3px;
+      margin-bottom: 12px;
+      letter-spacing: 0.03em;
+    }
+  `)
+
+  const template = (`
+    <aside class="sidenav">
+      ${createLinks()}
+    </aside>
+  `)
+
+  return { name, styles, template }
 }
+
+export default Nav

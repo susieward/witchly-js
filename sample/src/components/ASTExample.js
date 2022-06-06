@@ -1,13 +1,13 @@
 
 const ASTComponent = {
   name: 'ast-component',
-  data() {
+  state() {
     return {
       text: 'hello from an AST-based component!',
       showMessage: false
     }
   },
-  connected() {
+  connectedCallback() {
     this.style = 'color: blue'
     this.$append('whoa')
   },

@@ -1,118 +1,82 @@
+const { watch } = require('./proxy')
 
-function initOptions(obj, context, callback) {
-  const descObj = buildDescriptorsObj(obj, context)
+function initOptions(options, vm, callback) {
+  const staticProps = ['name', 'components', 'constructor']
+  let descriptors = Object.getOwnPropertyDescriptors(options)
 
-  for (const key of Object.keys(descObj)) {
-    const desc = descObj[key]
-    if (desc.hasOwnProperty('value') && typeof desc['value'] === 'function') {
-      if (key === 'data') {
-        const data = obj.data()
-        observe(data, context, callback)
-      } else {
-        let val = obj[`${key}`]
-        Object.defineProperty(context, key, {
-          value: val.bind(context),
-          enumerable: true
-        })
-      }
+  if (options.constructor.name !== 'Object') {
+    const prototypeDesc = Object.getOwnPropertyDescriptors(options.constructor.prototype)
+    descriptors = { ...descriptors, ...prototypeDesc }
+  }
+
+  for (const key of Object.keys(descriptors)) {
+    const desc = descriptors[key]
+    if (key === 'state') {
+      continue
+    } else if (staticProps.includes(key)) {
+      _initStaticProp(key, desc, vm)
+    } else if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
+      _initMethod(key, desc, vm)
     } else {
-      Object.defineProperty(context, key, desc)
+      Object.defineProperty(vm, key, desc)
     }
   }
-  return context
-}
 
-
-function buildDescriptorsObj(obj, context) {
-  let descObj = Object.getOwnPropertyDescriptors(obj)
-  const dataset = Object.getOwnPropertyDescriptors(context.dataset)
-  descObj = { ...descObj, ...dataset }
-  if (obj.constructor.name !== 'Object') {
-    descObj = {
-      ...descObj,
-      ...Object.getOwnPropertyDescriptors(obj.constructor.prototype)
-    }
+  const attrs = vm.attributes
+  if (attrs && Object.keys(attrs)?.length > 0) {
+    _initAttributes(vm, attrs)
   }
-  return descObj
+
+  if (descriptors.state) {
+    const key = 'state'
+    const desc = descriptors[key]
+    _initState(key, desc, vm, callback)
+  }
+
+  return vm
 }
 
-function observe(obj, context, callback = null, handlerFn = handler) {
-  if (!callback) callback = (...args) => args
-
-  const proxy = new Proxy(obj, handlerFn(context, callback))
-  const configs = Object.keys(obj).map(key => {
-    return [`${key}`, {
-      get() {
-        return proxy[`${key}`]
-      },
-      set(val) {
-        return proxy[`${key}`] = val
-      },
-      enumerable: true,
-      configurable: true
-    }]
+function _initStaticProp(key, desc, vm) {
+  Object.defineProperty(vm, key, {
+    ...desc,
+    enumerable: true,
+    writeable: false
   })
-  Object.defineProperties(context, { ...Object.fromEntries(configs) })
-  return proxy
 }
 
-function handler(context, callback, ref = null) {
-  return {
-    get(target, prop) {
-      if (prop === 'toJSON') {
-        return () => target
-      }
-      if (['[object Object]', '[object Array]'].indexOf(Object.prototype.toString.call(target[prop])) > -1) {
-        return new Proxy(target[prop], handler(context, callback, prop))
-      }
-      return target[prop]
-		},
-    set(target, prop, value) {
-      let newVal = value
-      let oldVal = target[prop]
-      if (ref) {
-        if (prop !== 'length') {
-          if (Array.isArray(context[ref]) && !Number.isNaN(prop)) {
-            if (oldVal !== undefined) {
-              target[prop] = value
-              callback.apply(context, [ref, newVal, oldVal, context])
-        			return true
-            }
-            newVal = target
-            oldVal = context[ref]
-            target[prop] = value;
-            callback.apply(context, [ref, newVal, oldVal, context])
-      			return true
-          }
-        }
-        if (newVal < oldVal) {
-          newVal = target
-          oldVal = context[ref]
-          target[prop] = value;
-          callback.apply(context, [ref, newVal, oldVal, context])
-          return true
-        }
-      }
-      target[prop] = value
-      if (typeof context[prop] !== "undefined") {
-        callback.apply(context, [prop, newVal, oldVal, context])
-      }
-      return true
+function _initMethod(key, desc, vm) {
+  const boundFn = desc.value.bind(vm)
+  Object.defineProperty(vm, key, {
+    value: boundFn,
+    enumerable: true
+  })
+}
+
+function _initState(key, desc, vm, callback) {
+  if (typeof desc.value !== 'function') {
+    throw new Error('State must be a function')
+  }
+  const result = desc.value.call(vm)
+  if (!result || typeof result !== 'object') {
+    throw new Error('State must return an object')
+  }
+  watch(result, vm, callback)
+}
+
+function _initAttributes(vm, attrs) {
+  const attrsMap = Object.getOwnPropertyDescriptors(attrs)
+  for (const key of Object.keys(attrsMap)) {
+    const num = Number(key)
+    if (Number.isNaN(num)) {
+      const desc = attrsMap[key]
+      Object.defineProperty(vm, key, {
+        get() {
+          return attrs[key].value
+        },
+        enumerable: true
+      })
     }
   }
 }
 
-function preprocess(options) {
-  if (options.hasOwnProperty('default')) {
-    options = options.default
-  }
-  if (options.constructor.name === 'Function') {
-    options = (!options.prototype) ? options() : new options()
-  }
-  if (options.constructor.name === 'Promise') {
-    return options.then(r => r.default)
-  }
-  return options
-}
-
-module.exports = { initOptions, observe, preprocess }
+module.exports = { initOptions }
