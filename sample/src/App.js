@@ -1,6 +1,5 @@
 import Header from '@/components/Header'
 import Sidenav from '@/components/Sidenav'
-// import { createElement, createFragment } from '../../src/index'
 
 const App = () => {
   const el = 'witchly-app'
@@ -17,7 +16,7 @@ const App = () => {
         <div id="app">
           <app-header></app-header>
           <main class="main">
-          <button onclick={() => this.hello()}>hello</button>
+            <button onclick={() => this.hello()}>hello</button>
             <Sidenav vm={this} links={links}></Sidenav>
             <router-view></router-view>
           </main>

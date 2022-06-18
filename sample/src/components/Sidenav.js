@@ -1,7 +1,3 @@
-import { createElement, createFragment } from '../../../src/index'
-
-/** @jsx createElement */
-/*** @jsxFrag createFragment */
 
 const Sidenav = (props) => {
   const el = 'app-sidenav'

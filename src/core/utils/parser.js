@@ -1,18 +1,20 @@
 
 function createElement(tag, props, ...children) {
+  if (children.length === 0 && props.children) {
+    children = [props.children]
+  }
   if (typeof tag === "function") return tag(props, ...children);
   const element = document.createElement(tag);
 
   Object.entries(props || {}).forEach(([name, value]) => {
     if (name.startsWith("on") && name.toLowerCase() in window)
       element.addEventListener(name.toLowerCase().substr(2), value);
-    else element.setAttribute(name, value.toString());
+    else if (name !== 'children') element.setAttribute(name, value.toString());
   });
 
   children.forEach(child => {
     appendChild(element, child);
   });
-
   return element;
 }
 
@@ -34,8 +36,10 @@ function parse(val, vm) {
   }
   let result = null
   if (typeof val === 'object') {
+    console.log('val', val)
     if (val.constructor.name.toLowerCase()?.includes('element')) {
       return parseElements([val], vm)
+      // return val
     }
     result = parseAST(val, vm)
   } else if (typeof val === 'string') {
@@ -208,4 +212,4 @@ function buildAST(el) {
   return ast
 }
 
-module.exports = { parse, createElement, createFragment }
+module.exports = { parse, createElement, createFragment, appendChild }

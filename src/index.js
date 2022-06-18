@@ -1,8 +1,6 @@
 const {
   WitchlyRouter,
   createComponent,
-  createElement,
-  createFragment
 } = require('./core')
 
 class Witchly {
@@ -28,5 +26,3 @@ class Witchly {
 }
 
 module.exports = Witchly
-module.exports.createElement = createElement
-module.exports.createFragment = createFragment
