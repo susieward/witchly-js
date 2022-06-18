@@ -1,26 +1,27 @@
 
 export default class Header {
-  name = 'app-header'
-  state = () => ({ textVal: '' })
-  defaultTitle = 'lightweight, hyper-flexible web components'
+  constructor() {
+    this.el = 'app-header'
+    this.state = () => ({ textVal: '' })
+    this.defaultTitle = 'lightweight, hyper-flexible web components'
+    this.components = {
+      Title:  class Title {
+        el = 'app-title'
+        color = '#745fb5'
 
-  components = {
-    Title:  class Title {
-      name = 'app-title'
-      color = '#745fb5'
+        static get observedAttributes() {
+          return ['text']
+        }
 
-      static get observedAttributes() {
-        return ['text']
-      }
-
-      get template() {
-        return `
-          <div class="title-container">
-            <h1 onclick="$go('/')" style="color: ${this.color}">
-              witchly.js
-            </h1>
-          <h2 style="color: #aaa">${this.text}</h2>
-        </div>`
+        get template() {
+          return `
+            <div class="title-container">
+              <h1 onclick="$go('/')" style="color: ${this.color}">
+                witchly.js
+              </h1>
+            <h2 style="color: #aaa">${this.text}</h2>
+          </div>`
+        }
       }
     }
   }

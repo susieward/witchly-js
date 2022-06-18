@@ -1,6 +1,6 @@
 
 export default {
-  name: 'about-view',
+  el: 'about-view',
   title: 'about',
   get template() {
     return `

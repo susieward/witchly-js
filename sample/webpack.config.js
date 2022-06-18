@@ -11,7 +11,8 @@ module.exports = {
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-    }
+    },
+    extensions: ['*', '.js']
   },
   devServer: {
     port: 8080,
@@ -20,6 +21,11 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.(js)$/,
+        exclude: /node_modules/,
+        use: ['babel-loader']
+      },
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader']

@@ -1,10 +1,15 @@
 
 function update(prop, newVal, oldVal, vm) {
+  // TO DO: handle newVal being an object/array
   if (!vm.shadowRoot?.firstChild) return
+  if (typeof newVal === typeof oldVal) {
+    if (newVal === oldVal) return
+  }
+
   const newDom = vm._domTemplate
   const oldDom = vm.shadowRoot.firstChild
-  const exp = buildXPathExpression(newVal)
 
+  const exp = buildXPathExpression(newVal)
   let matches = getChangedNodes(exp, newDom, oldDom)
 
   if (matches.length > 0) {

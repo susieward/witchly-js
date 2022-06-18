@@ -1,11 +1,12 @@
-const Examples = () => import('@/components/Examples')
 
-export default class Home {
-  name = 'home-view'
-  components = { Examples }
+export default {
+  el: 'home-view',
   get template() {
     return `
-      <app-examples></app-examples>
+    <content-element title-text="Home">
+      <div>
+      </div>
+    </content-element>
     `
   }
 }

@@ -1,6 +1,6 @@
 
 export default class ContentElement {
-  name = 'content-element'
+  el = 'content-element'
 
   static get observedAttributes() {
     return ['title-text']
@@ -9,9 +9,13 @@ export default class ContentElement {
   get template() {
     return `
       <div class="content">
-        <h2 data-if="${this['title-text']}">${this['title-text']}</h2>
+        ${this.title}
         <slot></slot>
       </div>
     `
+  }
+
+  get title() {
+    return this['title-text'] ? `<h2>${this['title-text']}</h2>` : ''
   }
 }

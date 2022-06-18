@@ -1,4 +1,4 @@
-import Witchly from 'witchly'
+import Witchly from '../../src/index'
 import App from './App'
 import Content from './components/Content'
 import './main.css'

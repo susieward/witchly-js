@@ -1,18 +1,31 @@
-const ComponentFactory = require('./component')
+const { registerComponent } = require('./components')
 
-class WitchlyRouter extends HTMLElement {
-  static _routes = []
-  static _root = null
+class RouterView extends HTMLElement {
+  static #routes = []
+  static #root = null
 
-  static get routes() {
-    return this._routes
+  static get _routes() {
+    return this.#routes
   }
 
-  static get root() {
-    return this._root
+  static set _routes(value) {
+    if (this.#routes.length === 0) {
+      return this.#routes = value
+    }
+    return false
+  }
+
+  static get _root() {
+    return this.#root
+  }
+
+  static set _root(value) {
+    return !this.#root ? this.#root = value : false
   }
 
   #components = {}
+  #location = window.location
+  #history = window.history
 
   constructor() {
     super()
@@ -23,19 +36,15 @@ class WitchlyRouter extends HTMLElement {
   }
 
   get routes() {
-    return this.constructor.routes
+    return this.constructor._routes
   }
 
   get currentRoute() {
     return this._match(this._path)
   }
 
-  get #location() {
-    return window.location
-  }
-
-  get #history() {
-    return window.history
+  get _currentComponent() {
+    return this.#components[this.currentRoute.name]
   }
 
   get _basePath() {
@@ -43,7 +52,7 @@ class WitchlyRouter extends HTMLElement {
   }
 
   get _root() {
-    return this.constructor.root
+    return this.constructor._root
   }
 
   get _path() {
@@ -61,7 +70,7 @@ class WitchlyRouter extends HTMLElement {
   async _render() {
     let comp = this.#components[this.currentRoute.name]
     if (!comp) {
-      comp = await ComponentFactory.registerComponent(this.currentRoute.component, this._root)
+      comp = await registerComponent(this.currentRoute.component, this._root)
       this.#components[this.currentRoute.name] = comp
     }
     const el = new comp._ctor()
@@ -105,16 +114,19 @@ class WitchlyRouter extends HTMLElement {
   }
 }
 
-class Router {
-  constructor({ routes }, root){
-    WitchlyRouter._routes = routes
-    WitchlyRouter._root = root
-    customElements.define('witchly-router', WitchlyRouter)
+class WitchlyRouter {
+  #root = null
+
+  constructor({ routes }, root) {
+    this.#root = root
+    RouterView._routes = routes
+    RouterView._root = root
+    customElements.define('router-view', RouterView)
   }
 
   get #view() {
-    const app = document.querySelector('witchly-app')
-    return app.shadowRoot.querySelector('witchly-router')
+    const app = this.#root._el
+    return app.shadowRoot.querySelector('router-view')
   }
 
   push(data) {
@@ -122,4 +134,4 @@ class Router {
   }
 }
 
-module.exports = Router
+module.exports = WitchlyRouter

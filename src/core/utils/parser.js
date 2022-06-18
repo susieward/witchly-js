@@ -1,10 +1,42 @@
 
+function createElement(tag, props, ...children) {
+  if (typeof tag === "function") return tag(props, ...children);
+  const element = document.createElement(tag);
+
+  Object.entries(props || {}).forEach(([name, value]) => {
+    if (name.startsWith("on") && name.toLowerCase() in window)
+      element.addEventListener(name.toLowerCase().substr(2), value);
+    else element.setAttribute(name, value.toString());
+  });
+
+  children.forEach(child => {
+    appendChild(element, child);
+  });
+
+  return element;
+}
+
+function appendChild(parent, child) {
+  if (Array.isArray(child))
+    child.forEach(nestedChild => appendChild(parent, nestedChild));
+  else
+    parent.appendChild(child.nodeType ? child : document.createTextNode(child));
+};
+
+function createFragment(props, ...children) {
+  return children;
+}
+
+
 function parse(val, vm) {
   if (!val) {
     throw new Error(`Cannot parse invalid value: ${JSON.stringify(val)}`)
   }
   let result = null
   if (typeof val === 'object') {
+    if (val.constructor.name.toLowerCase()?.includes('element')) {
+      return parseElements([val], vm)
+    }
     result = parseAST(val, vm)
   } else if (typeof val === 'string') {
     result = parseTemplateString(val, vm)
@@ -61,24 +93,24 @@ function parseElements(domEls, vm, parentId = null) {
 function _parseEvent(attr, el, vm) {
   const val = el.getAttribute(attr)
   const evt = attr.substring(2)
-  let args = ''
+  let evtArgs = ''
   let fn = val.slice()
 
   if (fn.includes(`(`)) {
     fn = fn.substring(0, fn.indexOf(`(`))
-    args = val.substring(val.indexOf(`(`) + 1, val.indexOf(`)`)).replaceAll(`'`, ``)
-    args = args.split(',')
+    evtArgs = val.substring(val.indexOf(`(`) + 1, val.indexOf(`)`)).replaceAll(`'`, ``)
+    evtArgs = evtArgs.split(',')
   }
 
   let callback = vm[fn]
   if (callback) {
-    if (args.length > 0) {
+    if (evtArgs.length > 0) {
       el.addEventListener(evt, function() {
-        return callback.apply(vm, [...args])
+        return callback.apply(vm, [...evtArgs])
       })
     } else {
-      el.addEventListener(evt, function(...arguments) {
-        return callback.call(vm, ...arguments)
+      el.addEventListener(evt, function(...args) {
+        return callback.call(vm, ...args)
       })
     }
     el.removeAttribute(attr)
@@ -176,4 +208,4 @@ function buildAST(el) {
   return ast
 }
 
-module.exports = { parse }
+module.exports = { parse, createElement, createFragment }

@@ -1,12 +1,16 @@
+import { createElement, createFragment } from '../../../src/index'
 
-const Nav = (links) => {
-  const name = 'app-sidenav'
+/** @jsx createElement */
+/*** @jsxFrag createFragment */
 
-  const createLinks = () => {
-    return links.map(link => {
-      return `<span class="link" onclick="$go(${link.path})">${link.name}</span>`
-    }).join('')
-  }
+const Sidenav = (props) => {
+  const el = 'app-sidenav'
+
+  const navLinks = props.links.map(link => {
+    return (<span class="link" onClick={() => props.vm.$go(link.path)}>
+      {link.name}
+    </span>)
+  })
 
   const styles = (`
     .link {
@@ -23,13 +27,17 @@ const Nav = (links) => {
     }
   `)
 
-  const template = (`
+  // return { el, styles, template }
+  return (
+    <div>
     <aside class="sidenav">
-      ${createLinks()}
+      {navLinks}
     </aside>
-  `)
-
-  return { name, styles, template }
+    <style>
+    {styles}
+    </style>
+    </div>
+  )
 }
 
-export default Nav
+export default Sidenav

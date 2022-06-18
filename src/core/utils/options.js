@@ -1,7 +1,7 @@
-const { watch } = require('./proxy')
+const { observe } = require('./proxy')
 
 function initOptions(options, vm, callback) {
-  const staticProps = ['name', 'components', 'constructor']
+  const staticProps = ['el', 'components', 'constructor']
   let descriptors = Object.getOwnPropertyDescriptors(options)
 
   if (options.constructor.name !== 'Object') {
@@ -11,12 +11,25 @@ function initOptions(options, vm, callback) {
 
   for (const key of Object.keys(descriptors)) {
     const desc = descriptors[key]
-    if (key === 'state') {
+    if (key === 'template') {
+      if (desc.value && typeof desc.value === 'function') {
+        const val = desc.value.call(vm)
+        Object.defineProperty(vm, 'template', {
+          get() {
+            return val
+          },
+          enumerable: true,
+          configureable: true
+        })
+      } else {
+        Object.defineProperty(vm, key, desc)
+      }
+    } else if (key === 'state') {
       continue
     } else if (staticProps.includes(key)) {
-      _initStaticProp(key, desc, vm)
+      _defineStaticProp(key, desc, vm)
     } else if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
-      _initMethod(key, desc, vm)
+      _defineMethod(key, desc, vm)
     } else {
       Object.defineProperty(vm, key, desc)
     }
@@ -24,35 +37,18 @@ function initOptions(options, vm, callback) {
 
   const attrs = vm.attributes
   if (attrs && Object.keys(attrs)?.length > 0) {
-    _initAttributes(vm, attrs)
+    _defineAttributes(vm, attrs)
   }
 
   if (descriptors.state) {
     const key = 'state'
     const desc = descriptors[key]
-    _initState(key, desc, vm, callback)
+    _defineState(key, desc, vm, callback)
   }
-
   return vm
 }
 
-function _initStaticProp(key, desc, vm) {
-  Object.defineProperty(vm, key, {
-    ...desc,
-    enumerable: true,
-    writeable: false
-  })
-}
-
-function _initMethod(key, desc, vm) {
-  const boundFn = desc.value.bind(vm)
-  Object.defineProperty(vm, key, {
-    value: boundFn,
-    enumerable: true
-  })
-}
-
-function _initState(key, desc, vm, callback) {
+function _defineState(key, desc, vm, callback) {
   if (typeof desc.value !== 'function') {
     throw new Error('State must be a function')
   }
@@ -60,10 +56,27 @@ function _initState(key, desc, vm, callback) {
   if (!result || typeof result !== 'object') {
     throw new Error('State must return an object')
   }
-  watch(result, vm, callback)
+  observe(result, vm, callback)
 }
 
-function _initAttributes(vm, attrs) {
+function _defineStaticProp(key, desc, vm) {
+  Object.defineProperty(vm, key, {
+    ...desc,
+    enumerable: true,
+    writeable: false,
+    configureable: false
+  })
+}
+
+function _defineMethod(key, desc, vm) {
+  const boundFn = desc.value.bind(vm)
+  Object.defineProperty(vm, key, {
+    value: boundFn,
+    enumerable: true
+  })
+}
+
+function _defineAttributes(vm, attrs) {
   const attrsMap = Object.getOwnPropertyDescriptors(attrs)
   for (const key of Object.keys(attrsMap)) {
     const num = Number(key)

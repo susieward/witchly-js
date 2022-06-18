@@ -1,6 +1,6 @@
 
 export default class TextColors {
-  name = 'text-colors'
+  el = 'text-colors'
   state = () => ({
     color: '',
     colors: ['pink', 'linen', 'skyblue', 'turquoise', 'aqua']
@@ -20,7 +20,11 @@ export default class TextColors {
           </p>
           <input id="new-color" type="text" value="" />
           <button onclick="addColor">add color</button>
-          <p><button onclick="updateColor">set random text color</button></p>
+          <p>
+            <button onclick="updateColor">
+              random text color
+            </button>
+          </p>
         </div>
       </div>
     `)
@@ -28,7 +32,11 @@ export default class TextColors {
 
   get colorsList() {
     return this.colors.map(color => {
-      return `<span style="color: ${color}">${color}</span>`
+      return (`
+        <span onclick="setColor(${color})" style="color: ${color}">
+          ${color}
+        </span>
+      `)
     }).join(', ')
   }
 
@@ -42,6 +50,10 @@ export default class TextColors {
       nextColor = this.getRandomColor()
     }
     return nextColor
+  }
+
+  setColor(color) {
+    this.color = color
   }
 
   updateColor() {

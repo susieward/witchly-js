@@ -1,6 +1,6 @@
 
 export default class ListItems {
-  name = 'list-items'
+  el = 'list-items'
 
   static get observedAttributes() {
     return ['items']

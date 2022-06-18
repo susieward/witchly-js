@@ -1,5 +1,6 @@
 const Home = () => import('@/views/Home')
 const About = () => import('@/views/About')
+const Examples = () => import('@/views/Examples')
 
 export default {
   routes: [
@@ -7,6 +8,11 @@ export default {
       path: '/',
       name: 'home',
       component: Home
+    },
+    {
+      path: '/examples',
+      name: 'examples',
+      component: Examples
     },
     {
       path: '/about',
