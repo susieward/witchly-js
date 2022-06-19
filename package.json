@@ -1,6 +1,6 @@
 {
   "name": "witchly",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Lightweight, hyper-flexible, web components-based framework",
   "main": "src/index.js",
   "author": "Susie Ward",
@@ -10,17 +10,13 @@
     "url": "git+https://github.com/susieward/witchly-js.git"
   },
   "files": [
-    "src"
+    "src",
+    "jsx-runtime.js"
   ],
   "dependencies": {
     "html-webpack-plugin": "^5.5.0",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2",
     "webpack-dev-server": "^4.8.1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.18.5",
-    "@babel/preset-react": "^7.17.12",
-    "babel-loader": "^8.2.5"
   }
 }

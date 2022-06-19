@@ -1,7 +1,7 @@
 const {
   createElement,
   createFragment,
-} = require('../core')
+} = require('./src')
 
 
 function render(element, container) {
@@ -11,5 +11,5 @@ function render(element, container) {
 module.exports = {
   jsx: createElement,
   jsxs: render,
-  jsxFrag: createFragment
+  Fragment: createFragment
 }
