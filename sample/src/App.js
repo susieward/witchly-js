@@ -1,5 +1,5 @@
-import Header from '@/Header'
-import Sidenav from '@/Sidenav'
+import Header from '@/components/Header'
+import Sidenav from '@/components/Sidenav'
 
 const App = () => {
   const el = 'witchly-app'
