@@ -21,7 +21,6 @@ function _preprocess(_options, root = null) {
 
   if (options.constructor.name === 'Function') {
     options = (!options.prototype) ? options() : new options()
-    options = _preprocess(options)
   }
   if (options.constructor.name === 'Promise') {
     return options.then(r => _preprocess(r, root))

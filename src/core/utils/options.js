@@ -2,30 +2,14 @@ const { observe } = require('./proxy')
 
 function initOptions(options, vm, callback) {
   const staticProps = ['el', 'components', 'constructor']
-  let descriptors = Object.getOwnPropertyDescriptors(options)
-
-  if (options.constructor.name !== 'Object') {
-    const prototypeDesc = Object.getOwnPropertyDescriptors(options.constructor.prototype)
-    descriptors = { ...descriptors, ...prototypeDesc }
-  }
+  const descriptors = _buildDescriptorsObject(options)
 
   for (const key of Object.keys(descriptors)) {
     const desc = descriptors[key]
-    if (key === 'template') {
-      if (desc.value && typeof desc.value === 'function') {
-        const val = desc.value.call(vm)
-        Object.defineProperty(vm, 'template', {
-          get() {
-            return val
-          },
-          enumerable: true,
-          configureable: true
-        })
-      } else {
-        Object.defineProperty(vm, key, desc)
-      }
-    } else if (key === 'state') {
+    if (key === 'state') {
       continue
+    } else if (key === 'template') {
+      _defineTemplate(desc, vm)
     } else if (staticProps.includes(key)) {
       _defineStaticProp(key, desc, vm)
     } else if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
@@ -39,16 +23,40 @@ function initOptions(options, vm, callback) {
   if (attrs && Object.keys(attrs)?.length > 0) {
     _defineAttributes(vm, attrs)
   }
-
-  if (descriptors.state) {
-    const key = 'state'
-    const desc = descriptors[key]
-    _defineState(key, desc, vm, callback)
-  }
+  if (descriptors.state) _defineState(descriptors.state, vm, callback)
   return vm
 }
 
-function _defineState(key, desc, vm, callback) {
+function _buildDescriptorsObject(options) {
+  let descriptors = Object.getOwnPropertyDescriptors(options)
+
+  if (options.constructor.name !== 'Object') {
+    const prototypeDesc = Object.getOwnPropertyDescriptors(options.constructor.prototype)
+    descriptors = { ...descriptors, ...prototypeDesc }
+  }
+  return descriptors
+}
+
+function _defineTemplate(desc, vm) {
+  let val = ''
+  let getter = null
+  if (desc.hasOwnProperty('value')) {
+    val = (typeof desc.value === 'function')
+      ? desc.value.call(vm, vm)
+      : desc.value
+  } else if (desc.hasOwnProperty('get')) {
+    getter = desc.get
+  }
+  Object.defineProperty(vm, 'template', {
+    get() {
+      return getter ? getter.call(vm) : val
+    },
+    enumerable: true,
+    configureable: true
+  })
+}
+
+function _defineState(desc, vm, callback) {
   if (typeof desc.value !== 'function') {
     throw new Error('State must be a function')
   }
@@ -57,6 +65,22 @@ function _defineState(key, desc, vm, callback) {
     throw new Error('State must return an object')
   }
   observe(result, vm, callback)
+}
+
+function _defineAttributes(vm, attrs) {
+  const attrsMap = Object.getOwnPropertyDescriptors(attrs)
+  for (const key of Object.keys(attrsMap)) {
+    const num = Number(key)
+    if (Number.isNaN(num)) {
+      const desc = attrsMap[key]
+      Object.defineProperty(vm, key, {
+        get() {
+          return attrs[key].value
+        },
+        enumerable: true
+      })
+    }
+  }
 }
 
 function _defineStaticProp(key, desc, vm) {
@@ -74,22 +98,6 @@ function _defineMethod(key, desc, vm) {
     value: boundFn,
     enumerable: true
   })
-}
-
-function _defineAttributes(vm, attrs) {
-  const attrsMap = Object.getOwnPropertyDescriptors(attrs)
-  for (const key of Object.keys(attrsMap)) {
-    const num = Number(key)
-    if (Number.isNaN(num)) {
-      const desc = attrsMap[key]
-      Object.defineProperty(vm, key, {
-        get() {
-          return attrs[key].value
-        },
-        enumerable: true
-      })
-    }
-  }
 }
 
 module.exports = { initOptions }

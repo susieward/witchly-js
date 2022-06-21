@@ -7,37 +7,41 @@ export default class TextColors {
   })
 
   get template() {
-    return (`
+    const style = `color: ${this.color}`
+    return (
       <div>
-        <p style="color: ${this.color};">
+        <p style={style}>
           I'm some text!
         </p>
         <div>
-          <p>Text colors: ${this.colorsList}</p>
+          <p>Text colors: {this.colorsList}</p>
           <p>
             Current color:
-            <span style="color: ${this.color}">${this.color}</span>
+            <span style={style}>{this.color}</span>
           </p>
           <input id="new-color" type="text" value="" />
-          <button onclick="addColor">add color</button>
+          <button onclick={() => this.addColor()}>add color</button>
           <p>
-            <button onclick="updateColor">
+            <button onclick={() => this.updateColor()}>
               random text color
             </button>
           </p>
         </div>
       </div>
-    `)
+    )
   }
 
   get colorsList() {
     return this.colors.map(color => {
-      return (`
-        <span onclick="setColor(${color})" style="color: ${color}">
-          ${color}
+      const style = `color: ${color}`
+      return (
+        <span
+          onclick={() => this.setColor(color)}
+          style={style}>
+          {color}
         </span>
-      `)
-    }).join(', ')
+      )
+    })
   }
 
   get input() {

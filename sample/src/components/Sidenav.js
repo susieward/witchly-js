@@ -1,11 +1,11 @@
 
 const Sidenav = (props) => {
-  const el = 'app-sidenav'
-
   const navLinks = props.links.map(link => {
-    return (<span class="link" onClick={() => props.vm.$go(link.path)}>
-      {link.name}
-    </span>)
+    return (
+      <span class="link" onClick={() => props.vm.$go(link.path)}>
+        {link.name}
+      </span>
+    )
   })
 
   const styles = (`
@@ -23,15 +23,14 @@ const Sidenav = (props) => {
     }
   `)
 
-  // return { el, styles, template }
   return (
     <div>
-    <aside class="sidenav">
-      {navLinks}
-    </aside>
-    <style>
-    {styles}
-    </style>
+      <aside class="sidenav">
+        {navLinks}
+      </aside>
+      <style>
+        {styles}
+      </style>
     </div>
   )
 }

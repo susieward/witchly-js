@@ -1,34 +1,42 @@
 
 function createElement(tag, props, ...children) {
-  if (children.length === 0 && props.children) {
+  if (children.length === 0 && props?.children) {
     children = [props.children]
   }
-  if (typeof tag === "function") return tag(props, ...children);
-  const element = document.createElement(tag);
+  if (typeof tag === "function") {
+    return tag(props, ...children)
+  }
+  const element = document.createElement(tag)
 
   Object.entries(props || {}).forEach(([name, value]) => {
-    if (name.startsWith("on") && name.toLowerCase() in window)
-      element.addEventListener(name.toLowerCase().substr(2), value);
-    else if (name !== 'children') element.setAttribute(name, value.toString());
-  });
+    if (name.startsWith("on")) {
+      element.addEventListener(name.toLowerCase().substr(2), value)
+    } else if (name !== 'children') {
+      element.setAttribute(name, value?.toString() || '')
+    }
+  })
 
-  children.forEach(child => {
-    appendChild(element, child);
-  });
-  return element;
+  if (children.length > 0) {
+    children.forEach(child => {
+      appendChild(element, child)
+    })
+  }
+
+  return element
 }
 
 function appendChild(parent, child) {
-  if (Array.isArray(child))
-    child.forEach(nestedChild => appendChild(parent, nestedChild));
-  else
-    parent.appendChild(child.nodeType ? child : document.createTextNode(child));
-};
-
-function createFragment(props, ...children) {
-  return children;
+  if (!child) return
+  if (Array.isArray(child)) {
+    child.forEach(nestedChild => appendChild(parent, nestedChild))
+  } else {
+    parent.appendChild(child.nodeType ? child : document.createTextNode(child))
+  }
 }
 
+function createFragment(props, ...children) {
+  return children
+}
 
 function parse(val, vm) {
   if (!val) {
@@ -36,12 +44,9 @@ function parse(val, vm) {
   }
   let result = null
   if (typeof val === 'object') {
-    console.log('val', val)
-    if (val.constructor.name.toLowerCase()?.includes('element')) {
-      return parseElements([val], vm)
-      // return val
-    }
-    result = parseAST(val, vm)
+    result = (val.constructor.name.toLowerCase()?.includes('element'))
+      ? parseElements([val], vm)
+      : parseAST(val, vm)
   } else if (typeof val === 'string') {
     result = parseTemplateString(val, vm)
   }

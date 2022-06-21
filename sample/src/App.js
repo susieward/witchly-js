@@ -1,30 +1,33 @@
-import Header from '@/components/Header'
-import Sidenav from '@/components/Sidenav'
+import Header from '@/Header'
+import Sidenav from '@/Sidenav'
 
 const App = () => {
   const el = 'witchly-app'
+  const components = { Header }
+
   const links = [
     { name: 'Home', path: '/' },
     { name: 'Examples', path: '/examples' },
     { name: 'About', path: '/about' }
   ]
+
   return {
     el,
-    components: { Header },
+    components,
     get template() {
       return (
         <div id="app">
           <app-header></app-header>
           <main class="main">
-            <button onclick={() => this.hello()}>hello</button>
-            <Sidenav vm={this} links={links}></Sidenav>
+            <Sidenav vm={this} links={links} />
             <router-view></router-view>
+            <button onclick={() => this.hi()}>hi</button>
           </main>
         </div>
       )
     },
-    hello() {
-      return console.log(this.localName)
+    hi() {
+      return this.$querySelector('aside').appendChild(<span>hi</span>)
     }
   }
 }

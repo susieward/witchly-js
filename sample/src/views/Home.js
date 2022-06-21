@@ -2,11 +2,10 @@
 export default {
   el: 'home-view',
   get template() {
-    return `
-    <content-element title-text="Home">
-      <div>
-      </div>
-    </content-element>
-    `
+    return (
+      <content-element title-text="Home">
+        <div>An example home page. Nothing crazy.</div>
+      </content-element>
+    )
   }
 }

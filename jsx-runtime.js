@@ -4,8 +4,8 @@ const {
 } = require('./src')
 
 
-function render(element, container) {
-  return createElement(element, container)
+function render(tag, props) {
+  return createElement(tag, props)
 }
 
 module.exports = {

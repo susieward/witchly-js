@@ -7,28 +7,29 @@ export default class ListItems {
   }
 
   connectedCallback() {
-    this.$emit('input', 'hello from a child component!')
+    this.$emit('message', 'hello from a child component!')
   }
 
   get template() {
-    return `
+    return (
       <div>
-        <ul>${this.list}</ul>
+        <ul>
+          {this.currentItems}
+        </ul>
       </div>
-    `
+    )
   }
 
   get currentItems() {
-    return this.items.split(',')
-  }
-
-  get list() {
-    return this.currentItems.map((item, i) => {
-      return `
-        <li data-index="${i}" onclick="$emit('removed', ${i})">
-          ${item} ${i}
+    const items = this.getAttribute('items')
+    return items.split(',').map((item, i) => {
+      return (
+        <li
+          data-index={i}
+          onclick={() => this.$emit('removed', i)}>
+          {item} {i}
         </li>
-      `
-    }).join('')
+      )
+    })
   }
 }

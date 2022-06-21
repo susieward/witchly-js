@@ -13,12 +13,26 @@ class Observer {
       const desc = descObj[key]
       let value = desc.value
       let obs = null
+
       if (value && typeof value === 'object') {
-        obs = new Observer(value, this, this._update, key)
+        if (!value.constructor.name.toLowerCase()?.includes('element')) {
+          obs = new Observer(value, this, this._update, key)
+          Object.defineProperty(obj, key, {
+            value: obs._obj,
+            enumerable: true,
+            configurable: true
+          })
+        }
+      } else if (desc.hasOwnProperty('get') && typeof desc.get !== 'undefined') {
+        const getter = desc.get
+        const vm = this.getParentEl()
+        const value = getter.bind(vm)
         Object.defineProperty(obj, key, {
-          value: obs._obj,
+          get() {
+            return value()
+          },
           enumerable: true,
-          configurable: true
+          configureable: true
         })
       }
     }
@@ -38,7 +52,7 @@ class Observer {
     let oldVal = target[prop]
 
     if (this._ref) {
-      if (this._parent['_obj']) {
+      if (this._parent['_obj'] && this._parent._obj[this._ref]) {
         oldVal = this._parent._obj[this._ref]
         target[prop] = value
         newVal = target
@@ -54,6 +68,23 @@ class Observer {
 
   _update(prop, newVal, oldVal) {
     this._callback.call(this._parent, prop, newVal, oldVal)
+  }
+
+  getParentEl() {
+    if (this._parent.constructor.name !== 'Observer') {
+      return this._parent
+    }
+    let el = null
+    let parent = this._parent
+
+    while (parent) {
+      if (parent.constructor.name !== 'Observer') {
+        el = parent
+        break
+      }
+      parent = parent._parent
+    }
+    return el
   }
 }
 
