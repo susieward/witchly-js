@@ -29,7 +29,7 @@ export default class Examples {
       {
         id: 3,
         title: 'List Items',
-        show: true,
+        show: false,
         get template() {
           return (
             <div>
@@ -38,7 +38,7 @@ export default class Examples {
               </button>
               <list-items
                 onmessage={(e) => this.message = e.detail}
-                onremoved={(e) => this.updateItems(e)}
+                onremove={(e) => this.removeItem(e.detail)}
                 items={this.items}>
               </list-items>
             </div>
@@ -116,8 +116,7 @@ export default class Examples {
     this.items.push(text)
   }
 
-  updateItems(e) {
-    const index = e.detail
+  removeItem(index) {
     this.items.splice(index, 1)
   }
 }

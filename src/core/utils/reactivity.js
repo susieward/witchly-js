@@ -1,6 +1,5 @@
 
 function update(prop, newVal, oldVal, vm) {
-  // TO DO: handle newVal being an object/array
   if (!vm.shadowRoot?.firstChild) return
   if (typeof newVal === typeof oldVal) {
     if (newVal === oldVal) return
@@ -9,14 +8,20 @@ function update(prop, newVal, oldVal, vm) {
   const newDom = vm._domTemplate
   const oldDom = vm.shadowRoot.firstChild
 
+  if (!newVal || typeof newVal === 'object') {
+    newVal = null
+  }
+  compareNodes(newDom, oldDom, newVal)
+}
+
+function compareNodes(newDom, oldDom, newVal) {
   const exp = buildXPathExpression(newVal)
-  let matches = getChangedNodes(exp, newDom, oldDom)
+  const matches = getChangedNodes(exp, newDom, oldDom)
 
   if (matches.length > 0) {
     processMatches(matches, newVal)
   } else {
-    const domChanged = !oldDom.isEqualNode(newDom)
-    if (domChanged) {
+    if (!newDom.isEqualNode(oldDom)) {
       oldDom.replaceWith(newDom)
     }
   }
@@ -50,12 +55,18 @@ function processMatches(matches, newVal) {
       }
     }
 
-    const newText = newEl.innerText.trim().replaceAll('\n', '')
-    const oldText = oldEl.innerText.trim().replaceAll('\n', '')
-    const textDiff = newText !== oldText
+    if (newVal) {
+      const newText = newEl.innerText.trim().replaceAll('\n', '')
+      const oldText = oldEl.innerText.trim().replaceAll('\n', '')
+      const textDiff = newText !== oldText
 
-    if (textDiff && newEl.innerText.includes(newVal)) {
-      oldEl.innerText = newEl.innerText
+      if (textDiff && newEl.innerText.includes(newVal)) {
+        oldEl.innerText = newEl.innerText
+      }
+    } else {
+      if (newEl.hasChildNodes() || oldEl.hasChildNodes()) {
+        compareNodes(newEl, oldEl, newVal)
+      }
     }
   }
 }
@@ -79,6 +90,8 @@ function getChangedNodes(exp, newDom, oldDom) {
 }
 
 function buildXPathExpression(newVal) {
+  if (!newVal) return `.//*`
+
   const excludedAttrs = ['data-id', 'data-if']
   const excludedAttrNames = excludedAttrs.map(attr => `name()="${attr}"`).join(' or ')
   // retrieve any elements with text that includes the new value
@@ -88,8 +101,7 @@ function buildXPathExpression(newVal) {
   // retrieve any elements with conditional data attributes to check for changes
   const conditionalExp = `.//*[@data-if]`
   // join results
-  const exp = `${innerTextExp} | ${attrValExp} | ${conditionalExp}`
-  return exp
+  return `${innerTextExp} | ${attrValExp} | ${conditionalExp}`
 }
 
 function getXPathResults(exp, referenceNode, args = null) {

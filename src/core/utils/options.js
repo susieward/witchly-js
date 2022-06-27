@@ -19,9 +19,13 @@ function initOptions(options, vm, callback) {
     }
   }
 
-  const attrs = vm.attributes
-  if (attrs && Object.keys(attrs)?.length > 0) {
-    _defineAttributes(vm, attrs)
+  const attrs = vm.getAttributeNames()
+  if (attrs?.length > 0) {
+    _defineAttrs(attrs, vm)
+  }
+  const observedAttrs = options.observedAttributes || vm.constructor?.observedAttributes
+  if (observedAttrs?.length > 0) {
+    _defineObservedAttrs(observedAttrs, vm)
   }
   if (descriptors.state) _defineState(descriptors.state, vm, callback)
   return vm
@@ -29,7 +33,6 @@ function initOptions(options, vm, callback) {
 
 function _buildDescriptorsObject(options) {
   let descriptors = Object.getOwnPropertyDescriptors(options)
-
   if (options.constructor.name !== 'Object') {
     const prototypeDesc = Object.getOwnPropertyDescriptors(options.constructor.prototype)
     descriptors = { ...descriptors, ...prototypeDesc }
@@ -67,20 +70,40 @@ function _defineState(desc, vm, callback) {
   observe(result, vm, callback)
 }
 
-function _defineAttributes(vm, attrs) {
-  const attrsMap = Object.getOwnPropertyDescriptors(attrs)
-  for (const key of Object.keys(attrsMap)) {
-    const num = Number(key)
-    if (Number.isNaN(num)) {
-      const desc = attrsMap[key]
-      Object.defineProperty(vm, key, {
-        get() {
-          return attrs[key].value
-        },
-        enumerable: true
-      })
-    }
+function _defineObservedAttrs(observedAttrs, vm) {
+  for (const attr of observedAttrs) {
+    Object.defineProperty(vm, attr, {
+      get() {
+        return vm.getAttribute(attr)
+      },
+      set(newVal) {
+        return vm.setAttribute(attr, newVal)
+      },
+      enumerable: true,
+      configureable: true
+    })
   }
+}
+
+function _defineAttrs(attrs, vm) {
+  const attrsObj = {}
+  for (const attr of attrs) {
+    Object.defineProperty(attrsObj, attr, {
+      get() {
+        return vm.getAttribute(attr)
+      },
+      set(newVal) {
+        return vm.setAttribute(attr, newVal)
+      },
+      enumerable: true,
+      configureable: true
+    })
+  }
+  Object.defineProperty(vm, '$attrs', {
+    value: attrsObj,
+    enumerable: true,
+    writeable: false
+  })
 }
 
 function _defineStaticProp(key, desc, vm) {

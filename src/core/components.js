@@ -23,7 +23,7 @@ function _preprocess(_options, root = null) {
     options = (!options.prototype) ? options() : new options()
   }
   if (options.constructor.name === 'Promise') {
-    return options.then(r => _preprocess(r, root))
+    return options.then(r => r)
   }
   if (options.components || options.constructor.components) {
     registerComponents(options, root)
@@ -45,11 +45,7 @@ async function registerComponent(_options, root) {
 function _createCtor(options, root = null) {
   return class extends Base {
     static get observedAttributes() {
-      return options.constructor.observedAttributes
-    }
-
-    static create() {
-      return new this
+      return options.observedAttributes || options.constructor.observedAttributes
     }
 
     get _options() {
@@ -64,6 +60,12 @@ function _createCtor(options, root = null) {
       super.connectedCallback()
       if (this._options.connectedCallback) {
         this._options.connectedCallback.call(this)
+      }
+    }
+
+    disconnectedCallback() {
+      if (this._options.disconnectedCallback) {
+        this._options.disconnectedCallback.call(this)
       }
     }
 

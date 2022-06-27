@@ -1,34 +1,35 @@
 
-function createElement(tag, props, ...children) {
+function createElement(tag, props = {}, ...children) {
   if (children.length === 0 && props?.children) {
     children = [props.children]
   }
-  if (typeof tag === "function") {
-    return tag(props, ...children)
-  }
-  const element = document.createElement(tag)
 
-  Object.entries(props || {}).forEach(([name, value]) => {
-    if (name.startsWith("on")) {
+  if (typeof tag === 'function') {
+    return (!tag.prototype) ? tag(props, children) : new tag(props, children)
+  }
+
+  const element = document.createElement(tag)
+  for (const [name, value] of Object.entries(props)) {
+    if (name.startsWith('on')) {
       element.addEventListener(name.toLowerCase().substr(2), value)
     } else if (name !== 'children') {
       element.setAttribute(name, value?.toString() || '')
     }
-  })
-
-  if (children.length > 0) {
-    children.forEach(child => {
-      appendChild(element, child)
-    })
   }
-
+  if (children.length > 0) {
+    for (const child of children) {
+      appendChild(element, child)
+    }
+  }
   return element
 }
 
 function appendChild(parent, child) {
   if (!child) return
   if (Array.isArray(child)) {
-    child.forEach(nestedChild => appendChild(parent, nestedChild))
+    for (const nestedChild of child) {
+      appendChild(parent, nestedChild)
+    }
   } else {
     parent.appendChild(child.nodeType ? child : document.createTextNode(child))
   }
@@ -51,14 +52,6 @@ function parse(val, vm) {
     result = parseTemplateString(val, vm)
   }
   return result
-}
-
-function parseTemplateString(template, vm) {
-  const temp = document.createElement('template')
-  temp.innerHTML = template
-  const domChildren = temp.content.cloneNode(true)
-  const output = parseElements(domChildren.children, vm)
-  return output
 }
 
 function parseElements(domEls, vm, parentId = null) {
@@ -138,7 +131,14 @@ function _parseConditionalExp(el) {
     }
     el.setAttribute('style', style)
   }
-  return el
+}
+
+function parseTemplateString(template, vm) {
+  const temp = document.createElement('template')
+  temp.innerHTML = template
+  const domChildren = temp.content.cloneNode(true)
+  const output = parseElements(domChildren.children, vm)
+  return output
 }
 
 function parseAST(ast, vm) {

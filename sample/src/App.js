@@ -27,7 +27,7 @@ const App = () => {
       )
     },
     hi() {
-      return this.$querySelector('aside').appendChild(<span>hi</span>)
+      this.$querySelector('aside').appendChild(<span>hi</span>)
     }
   }
 }
