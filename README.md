@@ -22,7 +22,7 @@ npm install witchly
 - In-depth documentation
 
 ### JSX Setup
-**Note:** A cli npm package is in the works that will automate this setup for you.
+**Note:** A cli npm package is in the works that will automate this setup for you, if desired.
 
 However, in the meantime:
 
@@ -30,7 +30,7 @@ Step 1: Install dev dependencies
 ```
 npm install --save-dev @babel/core @babel/cli @babel/preset-react
 ```
-If you're using webpack, you'll also need to install `babel-loader` and make sure your webpack config is set up to handle js files via the loader (use the sample app folder as an example if you've never done this before).
+If you're using webpack, you'll also need to install `babel-loader` and make sure your webpack config is set up to handle js files via the loader.
 
 
 Step 2: Configure babel
