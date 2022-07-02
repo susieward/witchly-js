@@ -9,7 +9,7 @@ const Title = (props) => {
 }
 
 export default class Header {
-  el = 'app-header'
+  name = 'app-header'
   state = () => ({ textVal: '' })
   defaultTitle = 'lightweight, hyper-flexible web components'
 

@@ -1,6 +1,6 @@
 
 export default () => {
-  const el = 'about-view'
+  const name = 'about-view'
   const title = 'about'
   const template = (vm) => {
     return (
@@ -16,5 +16,5 @@ export default () => {
       </content-element>
     )
   }
-  return { el, template }
+  return { name, template }
 }

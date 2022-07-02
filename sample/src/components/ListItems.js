@@ -1,6 +1,6 @@
 
 export default class ListItems {
-  el = 'list-items'
+  name = 'list-items'
   message = 'hello from a child component!'
 
   static get observedAttributes() {

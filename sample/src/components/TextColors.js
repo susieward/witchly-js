@@ -1,10 +1,11 @@
 
 export default class TextColors {
-  el = 'text-colors'
+  name = 'text-colors'
   state = () => ({
     color: '',
-    colors: ['pink', 'linen', 'skyblue', 'turquoise', 'aqua']
+    colors: ['pink', 'slateblue', 'skyblue', 'turquoise', 'aqua']
   })
+  styles = '.color { display: inline-block; margin-right: 10px;}'
 
   get template() {
     const style = `color: ${this.color}`
@@ -22,7 +23,7 @@ export default class TextColors {
           <input id="new-color" type="text" value="" />
           <button onclick={() => this.addColor()}>add color</button>
           <p>
-            <button onclick={() => this.updateColor()}>
+            <button onclick={() => this.randomColor()}>
               random text color
             </button>
           </p>
@@ -36,6 +37,7 @@ export default class TextColors {
       const style = `color: ${color}`
       return (
         <span
+          class="color"
           onclick={() => this.setColor(color)}
           style={style}>
           {color}
@@ -60,7 +62,7 @@ export default class TextColors {
     this.color = color
   }
 
-  updateColor() {
+  randomColor() {
     this.color = this.getRandomColor()
   }
 

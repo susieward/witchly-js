@@ -3,7 +3,7 @@ const ListItems = () => import('@/components/ListItems')
 const ASTComponent = () => import ('@/components/ASTComponent')
 
 export default class Examples {
-  el = 'app-examples'
+  name = 'app-examples'
   components = { TextColors, ListItems, ASTComponent }
   title = 'Examples'
   state = () => ({

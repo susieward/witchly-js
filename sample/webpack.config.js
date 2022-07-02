@@ -32,9 +32,6 @@ module.exports = {
       }
     ]
   },
-  experiments: {
-    topLevelAwait: true
-  },
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "./public/index.html")

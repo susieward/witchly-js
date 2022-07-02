@@ -13,7 +13,7 @@ class Witchly {
       this.router = new WitchlyRouter(options.router, this)
     }
     const comp = Witchly.component(options.render(), this)
-    const el = document.getElementById('app')
+    const el = document.getElementById(options.id)
     el.replaceWith(new comp._ctor())
     this.#el = document.querySelector(`${comp.name}`)
   }

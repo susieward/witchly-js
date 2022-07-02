@@ -1,6 +1,6 @@
 
 const ASTComponent = {
-  el: 'ast-component',
+  name: 'ast-component',
   state() {
     return {
       text: 'hello from an AST-based component!',

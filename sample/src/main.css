@@ -29,30 +29,6 @@ body {
   background-color: var(--bg-color);
 }
 
-button {
-  background-color: #fff;
-  border: none;
-  border: 1px solid var(--accent-color);
-  border-radius: 5px;
-  color: var(--accent-color);
-  padding: 6px 10px;
-  font-family: var(--font-family);
-  font-size: 16px;
-  cursor: pointer;
-  width: auto;
-}
-
-input[type=text] {
-  background-color: #fff;
-  border: none;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  color: var(--text-color);
-  padding: 6px 10px;
-  font-family: var(--font-family);
-  font-size: 16px;
-}
-
 h1 {
   font-weight: 300;
   padding: 0;
@@ -72,7 +48,7 @@ h2 {
 
 #app {
   display: grid;
-  grid-row-gap: 30px;
+  grid-row-gap: 50px;
   min-width: 100vw;
   margin: 0;
   padding: 0;
@@ -142,4 +118,28 @@ h2 {
   border: var(--content-border);
   border-radius: 5px;
   padding: 25px 30px;
+}
+
+button {
+  background-color: #fff;
+  border: none;
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  color: var(--accent-color);
+  padding: 6px 10px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  cursor: pointer;
+  width: auto;
+}
+
+input[type=text] {
+  background-color: #fff;
+  border: none;
+  border: var(--content-border);
+  border-radius: 5px;
+  color: var(--text-color);
+  padding: 6px 10px;
+  font-family: var(--font-family);
+  font-size: 16px;
 }

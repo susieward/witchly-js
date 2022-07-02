@@ -7,6 +7,7 @@ import router from './router'
 Witchly.component(Content)
 
 new Witchly({
+  id: 'app',
   render: () => App,
   router
 })

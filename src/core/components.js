@@ -3,7 +3,7 @@ const Base = require('./base')
 function createComponent(_options, root = null) {
   const options = _preprocess(_options, root)
   const comp = {
-    name: options.el,
+    name: options.name || options.el,
     _ctor: _createCtor(options, root)
   }
   if (!customElements.get(comp.name)) {

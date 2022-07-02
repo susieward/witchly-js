@@ -1,5 +1,5 @@
 export default class ContentElement {
-  el = 'content-element'
+  name = 'content-element'
 
   static get observedAttributes() {
     return ['title-text']

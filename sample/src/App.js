@@ -2,7 +2,7 @@ import Header from '@/components/Header'
 import Sidenav from '@/components/Sidenav'
 
 const App = () => {
-  const el = 'witchly-app'
+  const name = 'witchly-app'
   const components = { Header }
 
   const links = [
@@ -12,7 +12,7 @@ const App = () => {
   ]
 
   return {
-    el,
+    name,
     components,
     get template() {
       return (

@@ -57,18 +57,19 @@ That's it!
 import Witchly from 'witchly'
 
 const App = () => {
-  const el = 'my-app'
+  const name = 'my-app'
   const message = 'I'm a component using JSX!'
 
-  const template = () => {
+  const template = (vm) => {
     <div>
-      <p>{message}</p>
+      <p>{vm.message}</p>
     </div>
   }
-  return { el, template }
+  return { name, message, template }
 }
 
 new Witchly({
+  id: 'app',
   render: () => App
 })
 ```

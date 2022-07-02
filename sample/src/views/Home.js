@@ -1,6 +1,6 @@
 
 export default {
-  el: 'home-view',
+  name: 'home-view',
   get template() {
     return (
       <content-element title-text="Home">
