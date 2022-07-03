@@ -5,19 +5,22 @@ Lightweight, hyper-flexible, web components-based front-end framework. Under act
 https://npmjs.com/package/witchly
 
 CLI tool: https://npmjs.com/package/witchly-cli
-
+```
+npm install witchly
+```
 
 ## Quickstart
-Create a new project from scratch using the CLI:
+Install the CLI tool:
 ```
 npm install -g witchly-cli
 ```
 
+Generate a new project via the command line:
 ```
 witchly create my-app
 ```
 
-Or, install and use in an existing project:
-```
-npm install witchly
-```
+## In the works/upcoming
+- In-depth documentation
+- CLI tool improvements/enhancements
+- Usage examples
