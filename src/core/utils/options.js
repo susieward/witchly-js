@@ -41,18 +41,19 @@ function _buildDescriptorsObject(options) {
 }
 
 function _defineTemplate(desc, vm) {
-  let val = ''
+  let val
   let getter = null
-  if (desc.hasOwnProperty('value')) {
-    val = (typeof desc.value === 'function')
-      ? desc.value.call(vm, vm)
-      : desc.value
+  if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
+    val = desc.value
   } else if (desc.hasOwnProperty('get')) {
     getter = desc.get
+  } else {
+    throw new Error('Template must be a getter or a function')
   }
+
   Object.defineProperty(vm, 'template', {
     get() {
-      return getter ? getter.call(vm) : val
+      return getter ? getter.call(vm) : val.call(vm, vm)
     },
     enumerable: true,
     configureable: true

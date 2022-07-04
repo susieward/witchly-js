@@ -4,7 +4,7 @@ export default () => {
   const title = 'about'
   const template = (vm) => {
     return (
-      <content-element title-text={title}>
+      <app-content title-text={title}>
         <div>
         <p>
           <code>
@@ -13,7 +13,7 @@ export default () => {
           </p>
         <button onclick={() => vm.$go('/')}>home</button>
         </div>
-      </content-element>
+      </app-content>
     )
   }
   return { name, template }

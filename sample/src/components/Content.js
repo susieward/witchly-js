@@ -1,5 +1,5 @@
-export default class ContentElement {
-  name = 'content-element'
+export default class Content {
+  name = 'app-content'
 
   static get observedAttributes() {
     return ['title-text']
@@ -8,7 +8,7 @@ export default class ContentElement {
   get template() {
     return (
       <div class="content">
-        <h2>{this.getAttribute('title-text')}</h2>
+        <h2>{this['title-text']}</h2>
         <slot></slot>
       </div>
     )

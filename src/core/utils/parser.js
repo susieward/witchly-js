@@ -45,9 +45,7 @@ function parse(val, vm) {
   }
   let result = null
   if (typeof val === 'object') {
-    result = (val.constructor.name.toLowerCase()?.includes('element'))
-      ? parseElements([val], vm)
-      : parseAST(val, vm)
+    result = _isElement(val) ? parseElements([val], vm) : parseAST(val, vm)
   } else if (typeof val === 'string') {
     result = parseTemplateString(val, vm)
   }
@@ -215,6 +213,10 @@ function buildAST(el) {
     [tag]: nodeObj
   }
   return ast
+}
+
+function _isElement(val) {
+  return val.childNodes?.constructor?.name === 'NodeList'
 }
 
 module.exports = { parse, createElement, createFragment, appendChild }

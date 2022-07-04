@@ -62,10 +62,10 @@ export default class Examples {
 
   get template() {
     return (
-      <content-element title-text={this.title}>
+      <app-content title-text={this.title}>
         <span>{this.message}</span>
         {this.comps}
-      </content-element>
+      </app-content>
     )
   }
 
