@@ -1,25 +1,25 @@
+const { parse } = require('./parser')
 
-function update(prop, newVal, oldVal, vm) {
+async function update(prop, newVal, oldVal, vm) {
   if (!vm.shadowRoot?.firstChild) return
+  // TO DO: deep object/array equality checking
   if (typeof newVal === typeof oldVal) {
     if (newVal === oldVal) return
   }
 
-  const newDom = vm._domTemplate
+  const newDom = await parse(vm.template, vm)
   const oldDom = vm.shadowRoot.firstChild
 
-  if (!newVal || typeof newVal === 'object') {
-    newVal = null
-  }
+  if (!newVal || typeof newVal === 'object') newVal = null
   compareNodes(newDom, oldDom, newVal)
 }
 
 function compareNodes(newDom, oldDom, newVal) {
-  const exp = buildXPathExpression(newVal)
-  const matches = getChangedNodes(exp, newDom, oldDom)
+  const exp = _buildXPathExpression(newVal)
+  const matches = _getChangedNodes(exp, newDom, oldDom)
 
   if (matches.length > 0) {
-    processMatches(matches, newVal)
+    _processMatches(matches, newVal)
   } else {
     if (!newDom.isEqualNode(oldDom)) {
       oldDom.replaceWith(newDom)
@@ -27,7 +27,7 @@ function compareNodes(newDom, oldDom, newVal) {
   }
 }
 
-function processMatches(matches, newVal) {
+function _processMatches(matches, newVal) {
   matches = matches.reverse()
 
   for (const [index, match] of matches.entries()) {
@@ -71,15 +71,15 @@ function processMatches(matches, newVal) {
   }
 }
 
-function getChangedNodes(exp, newDom, oldDom) {
+function _getChangedNodes(exp, newDom, oldDom) {
   const matches = []
-  const newDomResults = getXPathResults(exp, newDom)
+  const newDomResults = _getXPathResults(exp, newDom)
 
   let el = newDomResults.iterateNext()
 
   while (el) {
     const matchExp = `.//*[name()="${el.localName}" and @data-id="${el.getAttribute('data-id')}"]`
-    const oldDomResults = getXPathResults(matchExp, oldDom)
+    const oldDomResults = _getXPathResults(matchExp, oldDom)
     const match = oldDomResults.iterateNext()
     if (match && !match.isEqualNode(el)) {
       matches.push({ newEl: el, oldEl: match })
@@ -89,7 +89,7 @@ function getChangedNodes(exp, newDom, oldDom) {
   return matches
 }
 
-function buildXPathExpression(newVal) {
+function _buildXPathExpression(newVal) {
   if (!newVal) return `.//*`
 
   const excludedAttrs = ['data-id', 'data-if']
@@ -104,7 +104,7 @@ function buildXPathExpression(newVal) {
   return `${innerTextExp} | ${attrValExp} | ${conditionalExp}`
 }
 
-function getXPathResults(exp, referenceNode, args = null) {
+function _getXPathResults(exp, referenceNode, args = null) {
   args = args || [null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null]
   return document.evaluate(exp, referenceNode, ...args)
 }

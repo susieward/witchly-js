@@ -56,13 +56,6 @@ function _createCtor(options, root = null) {
       return root
     }
 
-    connectedCallback() {
-      super.connectedCallback()
-      if (this._options.connectedCallback) {
-        this._options.connectedCallback.call(this)
-      }
-    }
-
     disconnectedCallback() {
       if (this._options.disconnectedCallback) {
         this._options.disconnectedCallback.call(this)

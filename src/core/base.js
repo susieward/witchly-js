@@ -1,18 +1,12 @@
-const { parse } = require('./utils/parser')
-const { update } = require('./utils/reactivity')
-const { initOptions } = require('./utils/options')
+const { parse, update, initOptions, initStyles } = require('./utils')
 
 class Base extends HTMLElement {
   constructor() {
     super()
-    initOptions(this._options, this, this.#update)
+    initOptions(this._options, this, this.#_update)
     if (this._options.createdCallback) {
       this._options.createdCallback.call(this)
     }
-  }
-
-  get _domTemplate() {
-    return parse(this.template, this)
   }
 
   get $router() {
@@ -20,16 +14,24 @@ class Base extends HTMLElement {
   }
 
   connectedCallback() {
-    this.attachShadow({ mode: 'open' })
-    _initStyles(this)
-    this.shadowRoot.append(this._domTemplate)
+    this.#_render()
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
-    this.#update(name, newVal, oldVal)
+    this.#_update(name, newVal, oldVal)
   }
 
-  #update(prop, newVal, oldVal) {
+  async #_render() {
+    this.attachShadow({ mode: 'open' })
+    initStyles(this, document)
+    const dom = await parse(this.template, this)
+    this.shadowRoot.append(dom)
+    if (this._options.connectedCallback) {
+      this._options.connectedCallback.call(this)
+    }
+  }
+
+  #_update(prop, newVal, oldVal) {
     return update(prop, newVal, oldVal, this)
   }
 
@@ -46,6 +48,10 @@ class Base extends HTMLElement {
     return this.shadowRoot.append(...args)
   }
 
+  $appendChild(el) {
+    return this.shadowRoot.appendChild(el)
+  }
+
   $querySelector(...args) {
     return this.shadowRoot.querySelector(...args)
   }
@@ -56,25 +62,6 @@ class Base extends HTMLElement {
 
   $go(args) {
     return this.$router.push(args)
-  }
-}
-
-function _initStyles(vm) {
-  let styles = []
-  if (vm._options.styles) {
-    styles.push(vm._options.styles)
-  }
-  if (document.styleSheets.length > 0) {
-    const docStyles = [...document.styleSheets].map(s => s.ownerNode.innerText)
-    styles.push(...docStyles)
-  }
-  if (styles.length > 0) {
-    const constructedStyles = styles.map(cssText => {
-      const styleSheet = new CSSStyleSheet()
-      styleSheet.replaceSync(cssText)
-      return styleSheet
-    })
-    vm.shadowRoot.adoptedStyleSheets = constructedStyles
   }
 }
 

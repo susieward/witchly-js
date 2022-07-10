@@ -19,9 +19,14 @@ const App = () => {
         <div id="app">
           <app-header></app-header>
           <main class="main">
-            <Sidenav vm={this} links={links} />
+            <Sidenav
+              vm={this}
+              links={links}>
+              <button onclick={() => this.hi()}>
+                hi
+              </button>
+            </Sidenav>
             <router-view></router-view>
-            <button onclick={() => this.hi()}>hi</button>
           </main>
         </div>
       )

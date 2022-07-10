@@ -88,12 +88,12 @@ class Observer {
   }
 }
 
-function observe(obj, context, callback = null) {
+function observe(obj, vm, callback = null) {
   if (!callback) callback = (...args) => args
 
-  const obs = new Observer(obj, context, callback)
+  const obs = new Observer(obj, vm, callback)
   const proxy = obs._obj
-  const configs = Object.keys(obj).map(key => {
+  const descMap = Object.keys(obj).map(key => {
     return [`${key}`, {
       get() {
         return proxy[`${key}`]
@@ -105,9 +105,7 @@ function observe(obj, context, callback = null) {
       configurable: true
     }]
   })
-  const desc = Object.fromEntries(configs)
-  Object.defineProperties(context, desc)
-  return proxy
+  Object.defineProperties(vm, Object.fromEntries(descMap))
 }
 
 module.exports = { observe }

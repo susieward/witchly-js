@@ -1,10 +1,10 @@
 const WitchlyRouter = require('./router')
 const { createComponent } = require('./components')
-const { createElement, createFragment } = require('./utils/parser')
+const { createElementJSX, createFragmentJSX } = require('./utils')
 
 module.exports = {
   WitchlyRouter,
   createComponent,
-  createElement,
-  createFragment
+  createElementJSX,
+  createFragmentJSX
 }

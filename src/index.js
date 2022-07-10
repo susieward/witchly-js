@@ -1,8 +1,8 @@
 const {
   WitchlyRouter,
   createComponent,
-  createElement,
-  createFragment
+  createElementJSX,
+  createFragmentJSX
 } = require('./core')
 
 class Witchly {
@@ -14,7 +14,8 @@ class Witchly {
     }
     const comp = Witchly.component(options.render(), this)
     const el = document.getElementById(options.id)
-    el.replaceWith(new comp._ctor())
+    const newEl = new comp._ctor()
+    el.replaceWith(newEl)
     this.#el = document.querySelector(`${comp.name}`)
   }
 
@@ -28,5 +29,5 @@ class Witchly {
 }
 
 module.exports = Witchly
-module.exports.createElement = createElement
-module.exports.createFragment = createFragment
+module.exports.createElementJSX = createElementJSX
+module.exports.createFragmentJSX = createFragmentJSX

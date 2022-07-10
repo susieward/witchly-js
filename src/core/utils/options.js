@@ -1,12 +1,13 @@
 const { observe } = require('./proxy')
 
 function initOptions(options, vm, callback) {
-  const staticProps = ['el', 'components', 'constructor']
+  const staticProps = ['name', 'components', 'constructor']
   const descriptors = _buildDescriptorsObject(options)
+  const watchedProps = options.watch ? Object.keys(options.watch) : []
 
   for (const key of Object.keys(descriptors)) {
     const desc = descriptors[key]
-    if (key === 'state') {
+    if (key === 'state' || watchedProps.includes(key)) {
       continue
     } else if (key === 'template') {
       _defineTemplate(desc, vm)
@@ -19,15 +20,13 @@ function initOptions(options, vm, callback) {
     }
   }
 
-  const attrs = vm.getAttributeNames()
-  if (attrs?.length > 0) {
-    _defineAttrs(attrs, vm)
+  _defineAttrs(vm, options)
+  if (descriptors.state) {
+    _defineState(descriptors.state, vm, callback)
   }
-  const observedAttrs = options.observedAttributes || vm.constructor?.observedAttributes
-  if (observedAttrs?.length > 0) {
-    _defineObservedAttrs(observedAttrs, vm)
+  if (watchedProps.length > 0) {
+    _defineWatchers(watchedProps, descriptors, vm)
   }
-  if (descriptors.state) _defineState(descriptors.state, vm, callback)
   return vm
 }
 
@@ -50,7 +49,6 @@ function _defineTemplate(desc, vm) {
   } else {
     throw new Error('Template must be a getter or a function')
   }
-
   Object.defineProperty(vm, 'template', {
     get() {
       return getter ? getter.call(vm) : val.call(vm, vm)
@@ -71,14 +69,24 @@ function _defineState(desc, vm, callback) {
   observe(result, vm, callback)
 }
 
-function _defineObservedAttrs(observedAttrs, vm) {
-  for (const attr of observedAttrs) {
-    Object.defineProperty(vm, attr, {
+function _defineWatchers(watchedProps, descriptors, vm) {
+  // TO DO: be able to watch a prop defined on the state object
+  for (const prop of watchedProps) {
+    const desc = descriptors[prop]
+    Object.defineProperty(vm, prop, {
       get() {
-        return vm.getAttribute(attr)
+        return desc.get?.call(vm) || desc.value
       },
-      set(newVal) {
-        return vm.setAttribute(attr, newVal)
+      set(val) {
+        if (desc.set) {
+          desc.set.call(vm, val)
+          vm.watch[prop].handler.call(vm, val)
+          return true
+        } else {
+          desc.value = val
+          vm.watch[prop].handler.call(vm, val)
+          return true
+        }
       },
       enumerable: true,
       configureable: true
@@ -86,25 +94,50 @@ function _defineObservedAttrs(observedAttrs, vm) {
   }
 }
 
-function _defineAttrs(attrs, vm) {
-  const attrsObj = {}
-  for (const attr of attrs) {
-    Object.defineProperty(attrsObj, attr, {
-      get() {
-        return vm.getAttribute(attr)
-      },
-      set(newVal) {
-        return vm.setAttribute(attr, newVal)
-      },
-      enumerable: true,
-      configureable: true
-    })
-  }
+function _defineAttrs(vm, options) {
   Object.defineProperty(vm, '$attrs', {
-    value: attrsObj,
+    get() {
+      return vm.attributes
+    },
     enumerable: true,
     writeable: false
   })
+  const observedAttrs = options.observedAttributes || vm.constructor?.observedAttributes
+  if (observedAttrs?.length > 0) {
+    for (const attr of observedAttrs) {
+      Object.defineProperty(vm, attr, {
+        get() {
+          return vm.getAttribute(attr)
+        },
+        set(newVal) {
+          return vm.setAttribute(attr, newVal)
+        },
+        enumerable: true,
+        configureable: true
+      })
+    }
+  }
+}
+
+function _buildAttrsObj(vm) {
+  const attrs = vm.getAttributeNames()
+  const attrsObj = {}
+
+  if (attrs.length > 0) {
+    for (const attr of attrs) {
+      Object.defineProperty(attrsObj, attr, {
+        get() {
+          return vm.getAttribute(attr)
+        },
+        set(newVal) {
+          return vm.setAttribute(attr, newVal)
+        },
+        enumerable: true,
+        configureable: true
+      })
+    }
+  }
+  return attrsObj
 }
 
 function _defineStaticProp(key, desc, vm) {

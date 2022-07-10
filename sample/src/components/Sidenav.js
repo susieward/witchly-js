@@ -1,8 +1,8 @@
 
-const Sidenav = (props) => {
+const Sidenav = (props, children) => {
   const navLinks = props.links.map(link => {
     return (
-      <span class="link" onClick={() => props.vm.$go(link.path)}>
+      <span class="link" onclick={() => props.vm.$go(link.path)}>
         {link.name}
       </span>
     )
@@ -27,6 +27,7 @@ const Sidenav = (props) => {
     <div>
       <aside class="sidenav">
         {navLinks}
+        {children}
       </aside>
       <style>
         {styles}

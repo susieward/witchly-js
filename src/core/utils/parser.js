@@ -1,11 +1,15 @@
 
-function createElement(tag, props = {}, ...children) {
-  if (children.length === 0 && props?.children) {
-    children = [props.children]
+function createElementJSX(tag, props = {}, ...children) {
+  if (props?.children) {
+    children = Array.isArray(props.children) ? props.children : [props.children]
   }
 
   if (typeof tag === 'function') {
-    return (!tag.prototype) ? tag(props, children) : new tag(props, children)
+    const result = !tag.prototype ? tag(props, children) : new tag(props, children)
+    if (result.constructor.name === 'Promise') {
+      return _processAsyncTag(result, props, children)
+    }
+    return result?.render?.call(result) || result
   }
 
   const element = document.createElement(tag)
@@ -17,39 +21,53 @@ function createElement(tag, props = {}, ...children) {
     }
   }
   if (children.length > 0) {
-    for (const child of children) {
-      appendChild(element, child)
-    }
+    _appendChild(element, children)
   }
   return element
 }
 
-function appendChild(parent, child) {
-  if (!child) return
-  if (Array.isArray(child)) {
-    for (const nestedChild of child) {
-      appendChild(parent, nestedChild)
-    }
+async function _appendChild(parent, child) {
+  if (!child) {
+    return
+  } else if (Array.isArray(child)) {
+    await Promise.all(child.map(c => _appendChild(parent, c)))
+  } else if (child.constructor.name === 'Promise') {
+    await child.then(c => _appendChild(parent, c))
   } else {
     parent.appendChild(child.nodeType ? child : document.createTextNode(child))
   }
 }
 
-function createFragment(props, ...children) {
+async function _processAsyncTag(tag, props, children) {
+  tag = await tag.then(r => r.default)
+  const result = !tag.prototype ? tag(props, children) : new tag(props, children)
+  return result?.render?.call(result) || result
+}
+
+function createFragmentJSX(props, ...children) {
+  if (props?.children) {
+    children = Array.isArray(props.children) ? props.children : [props.children]
+  }
   return children
 }
 
-function parse(val, vm) {
+async function parse(val, vm) {
   if (!val) {
     throw new Error(`Cannot parse invalid value: ${JSON.stringify(val)}`)
   }
   let result = null
-  if (typeof val === 'object') {
+  if (val.constructor.name === 'Promise') {
+    result = await val.then(result => parse(result, vm))
+  } else if (typeof val === 'object') {
     result = _isElement(val) ? parseElements([val], vm) : parseAST(val, vm)
   } else if (typeof val === 'string') {
     result = parseTemplateString(val, vm)
   }
   return result
+}
+
+function _isElement(val) {
+  return val.childNodes?.constructor?.name === 'NodeList'
 }
 
 function parseElements(domEls, vm, parentId = null) {
@@ -58,36 +76,59 @@ function parseElements(domEls, vm, parentId = null) {
 
   for (const el of domEls) {
     let id = `${el.localName}-${count}`
-    if (parentId) {
-      id = `${el.localName}-${count}-${parentId}`
-    }
+    if (parentId) id = `${el.localName}-${count}-${parentId}`
     el.setAttribute('data-id', id)
+
     if (el.hasAttribute('data-if')) {
       _parseConditionalExp(el)
     }
+
     if (el.hasChildNodes()) {
       const children = parseElements(el.children, vm, id)
       el.children = children
     }
 
     const attrs = el.getAttributeNames()
-    for (const attr of attrs) {
-      if (attr?.toLowerCase()?.includes('on')) {
-        _parseEvent(attr, el, vm)
-      } else if (attr?.startsWith(':')) {
-        const val = el.getAttribute(attr)
-        if (vm[val] !== undefined) {
-          el.addEventListener('input', function(e) {
-            return vm[val] = e.detail || e.target.value
-          })
-        }
-      }
+    const listeners = attrs.filter(a => {
+      return a.toLowerCase().includes('on') || a.startsWith(':')
+    })
+    if (listeners.length > 0) {
+      _parseEventListeners(el, listeners, vm)
     }
 
     els.push(el)
     count++
   }
   return els.length === 1 ? els[0] : els
+}
+
+function _parseConditionalExp(el) {
+  let value = el.dataset.if
+  if (['undefined', 'null', 'false'].includes(value)) {
+    value = false
+  }
+  if (value === false) {
+    let style = 'display: none;'
+    if (el.hasAttribute('style')) {
+      style = `${el.getAttribute('style')}; ${style}`
+    }
+    el.setAttribute('style', style)
+  }
+}
+
+function _parseEventListeners(el, attrs, vm) {
+  for (const attr of attrs) {
+    if (attr?.startsWith(':')) {
+      const val = el.getAttribute(attr)
+      if (vm[val] !== undefined) {
+        el.addEventListener('input', function(e) {
+          return vm[val] = e.detail || e.target.value
+        })
+      }
+    } else {
+      _parseEvent(attr, el, vm)
+    }
+  }
 }
 
 function _parseEvent(attr, el, vm) {
@@ -114,20 +155,6 @@ function _parseEvent(attr, el, vm) {
       })
     }
     el.removeAttribute(attr)
-  }
-}
-
-function _parseConditionalExp(el) {
-  let value = el.dataset.if
-  if (['undefined', 'null', 'false'].includes(value)) {
-    value = false
-  }
-  if (value === false) {
-    let style = 'display: none;'
-    if (el.hasAttribute('style')) {
-      style = `${el.getAttribute('style')}; ${style}`
-    }
-    el.setAttribute('style', style)
   }
 }
 
@@ -184,39 +211,4 @@ function _createElement(tag, attrs = {}, children = null) {
   return el
 }
 
-function buildAST(el) {
-  if (el.nodeType === 3) {
-    return el.data
-  }
-  const tag = el.localName
-  let attrs = null
-  let children = null
-
-  if (el.hasChildNodes) {
-    children = [...el.childNodes].map(child => buildAST(child))
-    if (children.length === 1 && typeof children[0] === 'string') {
-      children = children[0]
-    }
-  }
-  const attrNames = el.getAttributeNames()
-  if (attrNames?.length > 0) {
-    attrs = {}
-    for (const attr of attrNames) {
-      attrs[attr] = el.getAttribute(attr)
-    }
-  }
-  const nodeObj = {}
-  if (attrs) nodeObj['attrs'] = attrs
-  if (children) nodeObj['children'] = children
-
-  const ast = {
-    [tag]: nodeObj
-  }
-  return ast
-}
-
-function _isElement(val) {
-  return val.childNodes?.constructor?.name === 'NodeList'
-}
-
-module.exports = { parse, createElement, createFragment, appendChild }
+module.exports = { parse, createElementJSX, createFragmentJSX }
