@@ -1,4 +1,7 @@
-const { parse, update, initOptions, initStyles } = require('./utils')
+const { parse } = require('./utils/parser')
+const { update } = require('./utils/reactivity')
+const { initOptions } = require('./utils/options')
+const { initStyles } = require('./utils/styles')
 
 class Base extends HTMLElement {
   constructor() {
@@ -52,12 +55,12 @@ class Base extends HTMLElement {
     return this.shadowRoot.appendChild(el)
   }
 
-  $querySelector(...args) {
-    return this.shadowRoot.querySelector(...args)
+  $querySelector(arg) {
+    return this.shadowRoot.querySelector(arg)
   }
 
-  $querySelectorAll(...args) {
-    return this.shadowRoot.querySelectorAll(...args)
+  $querySelectorAll(arg) {
+    return this.shadowRoot.querySelectorAll(arg)
   }
 
   $go(args) {

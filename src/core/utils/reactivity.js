@@ -38,36 +38,42 @@ function _processMatches(matches, newVal) {
       if (oldEl.contains(prev.newEl)) continue
     }
 
-    const diffAttrs = newEl.getAttributeNames().filter(key => {
-      const newValue = newEl.getAttribute(key)
-      const oldValue = oldEl.getAttribute(key)
-      return (newValue !== oldValue)
-    })
-
-    if (diffAttrs.length > 0) {
-      for (const attr of diffAttrs) {
-        if (attr === 'data-if') {
-          oldEl.replaceWith(newEl)
-        } else {
-          const newValue = newEl.getAttribute(attr)
-          oldEl.setAttribute(attr, newValue)
-        }
-      }
+    if (newEl.hasAttributes() || oldEl.hasAttributes()) {
+      _processAttrs(newEl, oldEl)
     }
 
     if (newVal) {
-      const newText = newEl.innerText.trim().replaceAll('\n', '')
-      const oldText = oldEl.innerText.trim().replaceAll('\n', '')
-      const textDiff = newText !== oldText
-
-      if (textDiff && newEl.innerText.includes(newVal)) {
-        oldEl.innerText = newEl.innerText
-      }
+      _processInnerText(newEl, oldEl, newVal)
     } else {
       if (newEl.hasChildNodes() || oldEl.hasChildNodes()) {
         compareNodes(newEl, oldEl, newVal)
       }
     }
+  }
+}
+
+function _processAttrs(newEl, oldEl) {
+  const attrs = newEl.getAttributeNames()
+  for (const attr of attrs) {
+    const newAttrVal = newEl.getAttribute(attr)
+    const oldAttrVal = oldEl.getAttribute(attr)
+    if (newAttrVal !== oldAttrVal) {
+      if (attr === 'data-if') {
+        oldEl.replaceWith(newEl)
+      } else {
+        oldEl.setAttribute(attr, newAttrVal)
+      }
+    }
+  }
+}
+
+function _processInnerText(newEl, oldEl, newVal) {
+  const newText = newEl.innerText.trim().replaceAll('\n', '')
+  const oldText = oldEl.innerText.trim().replaceAll('\n', '')
+  const textDiff = newText !== oldText
+
+  if (textDiff && newEl.innerText.includes(newVal)) {
+    oldEl.innerText = newEl.innerText
   }
 }
 
@@ -90,7 +96,7 @@ function _getChangedNodes(exp, newDom, oldDom) {
 }
 
 function _buildXPathExpression(newVal) {
-  if (!newVal) return `.//*`
+  if (newVal == null) return `.//*`
 
   const excludedAttrs = ['data-id', 'data-if']
   const excludedAttrNames = excludedAttrs.map(attr => `name()="${attr}"`).join(' or ')

@@ -3,15 +3,12 @@ function createElementJSX(tag, props = {}, ...children) {
   if (props?.children) {
     children = Array.isArray(props.children) ? props.children : [props.children]
   }
-
-  if (typeof tag === 'function') {
-    const result = !tag.prototype ? tag(props, children) : new tag(props, children)
-    if (result.constructor.name === 'Promise') {
-      return _processAsyncTag(result, props, children)
-    }
-    return result?.render?.call(result) || result
+  if (typeof tag === 'object' && tag?.default) {
+    tag = tag.default
   }
-
+  if (typeof tag === 'function') {
+    return _processTag(tag, props, children)
+  }
   const element = document.createElement(tag)
   for (const [name, value] of Object.entries(props)) {
     if (name.startsWith('on')) {
@@ -21,7 +18,7 @@ function createElementJSX(tag, props = {}, ...children) {
     }
   }
   if (children.length > 0) {
-    _appendChild(element, children)
+    _appendChild(element, children).catch(e => console.error(e))
   }
   return element
 }
@@ -38,10 +35,17 @@ async function _appendChild(parent, child) {
   }
 }
 
-async function _processAsyncTag(tag, props, children) {
-  tag = await tag.then(r => r.default)
+function _processTag(tag, props, children) {
   const result = !tag.prototype ? tag(props, children) : new tag(props, children)
+  if (result.constructor.name === 'Promise') {
+    return _processTagAsync(result, props, children)
+  }
   return result?.render?.call(result) || result
+}
+
+async function _processTagAsync(tag, props, children) {
+  tag = await tag.then(r => r?.default || r)
+  return _processTag(tag, props, children)
 }
 
 function createFragmentJSX(props, ...children) {
@@ -55,7 +59,7 @@ async function parse(val, vm) {
   if (!val) {
     throw new Error(`Cannot parse invalid value: ${JSON.stringify(val)}`)
   }
-  let result = null
+  let result = ''
   if (val.constructor.name === 'Promise') {
     result = await val.then(result => parse(result, vm))
   } else if (typeof val === 'object') {

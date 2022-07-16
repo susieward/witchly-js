@@ -10,10 +10,11 @@
   "author": "Susie Ward",
   "license": "ISC",
   "dependencies": {
-    "witchly": "^1.1.6"
+    "witchly": "^1.1.7"
   },
   "devDependencies": {
     "@babel/core": "^7.18.5",
+    "@babel/plugin-syntax-import-assertions": "^7.18.6",
     "@babel/preset-react": "^7.17.12",
     "babel-loader": "^8.2.5",
     "css-loader": "^6.7.1",
@@ -32,6 +33,7 @@
           "importSource": "witchly"
         }
       ]
-    ]
+    ],
+    "plugins": ["@babel/plugin-syntax-import-assertions"]
   }
 }

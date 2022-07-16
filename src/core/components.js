@@ -12,13 +12,10 @@ function createComponent(_options, root = null) {
   return comp
 }
 
-function _preprocess(_options, root = null) {
-  let options = _options
-
+function _preprocess(options, root = null) {
   if (options.hasOwnProperty('default')) {
     options = options.default
   }
-
   if (options.constructor.name === 'Function') {
     options = (!options.prototype) ? options() : new options()
   }
@@ -38,7 +35,7 @@ async function registerComponents(options, root = null) {
 }
 
 async function registerComponent(_options, root) {
-  const options = await Promise.resolve(_preprocess(_options, root))
+  const options = await _preprocess(_options, root)
   return createComponent(options, root)
 }
 

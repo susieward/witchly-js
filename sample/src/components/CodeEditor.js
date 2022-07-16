@@ -2,48 +2,36 @@
 export default class CodeEditor {
   name = 'code-editor'
   defaultContent = '<p>Edit me!</p>'
+  templateHTML = ''
+
   watch = {
     templateHTML: {
-      handler() {
-        const children = this.templateEl.content.cloneNode(true)
-        this.$querySelector('#output').replaceChildren(children)
+      handler(newVal) {
+        this.$querySelector('#output').innerHTML = newVal
       }
     }
   }
 
   connectedCallback() {
-    this.init()
+    this.templateHTML = this.$querySelector('textarea').value
   }
 
   get template() {
     return (
       <div>
         <textarea
-          value=""
           id="editor"
           rows="10"
           oninput={(e) => this.templateHTML = e.target.value}>
+          {this.defaultContent}
         </textarea>
-        <button onclick={() => this.init()}>reset</button>
-        <template id="code-temp"></template>
+        <button onclick={() => this.reset()}>reset</button>
         <div id="output"></div>
       </div>
     )
   }
 
-  get templateEl() {
-    return this.$querySelector('#code-temp')
-  }
-
-  get templateHTML() {
-    return this.templateEl.innerHTML
-  }
-
-  set templateHTML(val) {
-    return this.templateEl.innerHTML = val
-  }
-
-  init() {
+  reset() {
     this.$querySelector('textarea').value = this.defaultContent
     this.templateHTML = this.defaultContent
   }
@@ -54,27 +42,24 @@ export default class CodeEditor {
         minHeight: '200px',
         width: '100%',
         border: '1px solid #eee',
-        'margin-top': '20px',
+        marginTop: '20px',
         padding: '10px',
         letterSpacing: '0.03em',
         fontSize: '16px'
       },
-
       ul: {
-        'list-style-type': '~ ',
+        listStyleType: '~ ',
         margin: 0,
         padding: '0 30px'
       },
-
       li: {
         margin: 0,
         padding: 0
       },
-
       a: {
         color: 'slateblue',
-        'text-decoration': 'none',
-        'letter-spacing': '0.03em'
+        textDecoration: 'none',
+        letterSpacing: '0.03em'
       }
     }
   }

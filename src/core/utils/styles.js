@@ -1,4 +1,6 @@
 
+const toKebabCase = (str) => str.replace(/[A-Z]/g, "-$&").toLowerCase()
+
 class StyleSheet extends CSSStyleSheet {
   replaceSync(cssVal) {
     if (typeof cssVal === 'object') {
@@ -11,7 +13,7 @@ class StyleSheet extends CSSStyleSheet {
   toCSSText(styleMap) {
     return Object.entries(styleMap).map(([key, val]) => {
       return (
-        `${key} { ${Object.keys(val).map(k => `${k}: ${val[k]};`).join(' ')} }`
+        `${key} { ${Object.keys(val).map(k => `${toKebabCase(k)}: ${val[k]};`).join(' ')} }`
       )
     }).join('\n')
   }
@@ -19,7 +21,6 @@ class StyleSheet extends CSSStyleSheet {
 
 function initStyles(vm, doc) {
   let styles = []
-
   if (vm._options.styles) {
     styles.push(vm._options.styles)
   }

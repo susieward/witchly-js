@@ -1,5 +1,5 @@
 import Header from '@/components/Header'
-import Sidenav from '@/components/Sidenav'
+const Sidenav = await import('@/components/Sidenav')
 
 const App = () => {
   const name = 'witchly-app'
@@ -19,9 +19,7 @@ const App = () => {
         <div id="app">
           <app-header></app-header>
           <main class="main">
-            <Sidenav
-              vm={this}
-              links={links}>
+            <Sidenav vm={this} links={links}>
               <button onclick={() => this.hi()}>
                 hi
               </button>

@@ -14,8 +14,7 @@ class Witchly {
     }
     const comp = Witchly.component(options.render(), this)
     const el = document.getElementById(options.id)
-    const newEl = new comp._ctor()
-    el.replaceWith(newEl)
+    el.replaceWith(new comp._ctor())
     this.#el = document.querySelector(`${comp.name}`)
   }
 

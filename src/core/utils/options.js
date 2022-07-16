@@ -78,13 +78,14 @@ function _defineWatchers(watchedProps, descriptors, vm) {
         return desc.get?.call(vm) || desc.value
       },
       set(val) {
+        const oldVal = desc.value
         if (desc.set) {
           desc.set.call(vm, val)
-          vm.watch[prop].handler.call(vm, val)
+          vm.watch[prop].handler.call(vm, val, oldVal)
           return true
         } else {
           desc.value = val
-          vm.watch[prop].handler.call(vm, val)
+          vm.watch[prop].handler.call(vm, val, oldVal)
           return true
         }
       },
@@ -95,16 +96,25 @@ function _defineWatchers(watchedProps, descriptors, vm) {
 }
 
 function _defineAttrs(vm, options) {
-  Object.defineProperty(vm, '$attrs', {
-    get() {
-      return vm.attributes
-    },
-    enumerable: true,
-    writeable: false
-  })
   const observedAttrs = options.observedAttributes || vm.constructor?.observedAttributes
+  let attrs = vm.getAttributeNames()
+
   if (observedAttrs?.length > 0) {
     for (const attr of observedAttrs) {
+      Object.defineProperty(vm, attr, {
+        get() {
+          return vm.getAttribute(attr)
+        },
+        enumerable: true,
+        configureable: true
+      })
+    }
+  }
+
+  if (attrs.length > 0) {
+    const defined = observedAttrs || []
+    attrs = attrs.filter(a => !defined.includes(a))
+    for (const attr of attrs) {
       Object.defineProperty(vm, attr, {
         get() {
           return vm.getAttribute(attr)
@@ -117,27 +127,6 @@ function _defineAttrs(vm, options) {
       })
     }
   }
-}
-
-function _buildAttrsObj(vm) {
-  const attrs = vm.getAttributeNames()
-  const attrsObj = {}
-
-  if (attrs.length > 0) {
-    for (const attr of attrs) {
-      Object.defineProperty(attrsObj, attr, {
-        get() {
-          return vm.getAttribute(attr)
-        },
-        set(newVal) {
-          return vm.setAttribute(attr, newVal)
-        },
-        enumerable: true,
-        configureable: true
-      })
-    }
-  }
-  return attrsObj
 }
 
 function _defineStaticProp(key, desc, vm) {

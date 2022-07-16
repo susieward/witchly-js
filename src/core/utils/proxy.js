@@ -5,6 +5,7 @@ class Observer {
     this._callback = callback
     this._ref = ref
     this._obj = this.init(obj)
+    // console.log(this)
   }
 
   init(obj) {
@@ -42,27 +43,24 @@ class Observer {
         return target[prop]
       },
       set(target, prop, value) {
-        return self._handler(target, prop, value)
+        const oldVal = target[prop]
+        return self._handler(target, prop, value, oldVal)
       }
     })
   }
 
-  _handler(target, prop, value) {
-    let newVal = value
-    let oldVal = target[prop]
-
+  _handler(target, prop, newVal, oldVal) {
     if (this._ref) {
       if (this._parent['_obj'] && this._parent._obj[this._ref]) {
         oldVal = this._parent._obj[this._ref]
-        target[prop] = value
+        target[prop] = newVal
         newVal = target
         this._callback.call(this._parent, this._ref, newVal, oldVal)
         return true
       }
     }
-
-    target[prop] = value
-    this._callback.call(this._parent, prop, value, oldVal)
+    target[prop] = newVal
+    this._callback.call(this._parent, prop, newVal, oldVal)
     return true
   }
 
@@ -88,9 +86,7 @@ class Observer {
   }
 }
 
-function observe(obj, vm, callback = null) {
-  if (!callback) callback = (...args) => args
-
+function observe(obj, vm, callback) {
   const obs = new Observer(obj, vm, callback)
   const proxy = obs._obj
   const descMap = Object.keys(obj).map(key => {

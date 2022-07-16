@@ -13,13 +13,12 @@ export default class ListItems {
 
   get template() {
     return (
-      <div>
-        {this.items ? <ul>{this.currentItems}</ul> : ''}
-      </div>
+      <ul>{this.currentItems}</ul>
     )
   }
 
   get currentItems() {
+    if (!this.items) return
     return this.items.split(',').map((item, i) => {
       return (
         <li
