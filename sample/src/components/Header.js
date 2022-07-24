@@ -2,7 +2,9 @@
 const Title = (props) => {
   return (
     <div class="title-container">
-      <h1 style="color: #745fb5">witchly.js</h1>
+      <h1 style="color: #745fb5; cursor: pointer" onclick={() => props.onclick()}>
+        witchly.js
+      </h1>
       <h2 style="color: #aaa">{props.text}</h2>
     </div>
   )
@@ -14,7 +16,7 @@ export default class Header {
   defaultTitle = 'lightweight, hyper-flexible web components'
 
   connectedCallback() {
-    this.inputEl.placeholder = 'Update title text'
+    this.inputEl.placeholder = 'Type something'
   }
 
   get template() {

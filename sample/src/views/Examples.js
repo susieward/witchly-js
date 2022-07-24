@@ -64,7 +64,9 @@ export default class Examples {
     return (
       <app-content title-text={this.title}>
         <span>{this.message}</span>
-        {this.comps}
+        <div id="examples">
+          {this.comps}
+        </div>
       </app-content>
     )
   }
@@ -72,7 +74,7 @@ export default class Examples {
   get comps() {
     return this.exampleComps.map(comp => {
       return (
-        <div id="examples">
+        <div class="example">
           <span
             class="link"
             onclick={() => this.toggleComp(comp)}>
@@ -93,17 +95,16 @@ export default class Examples {
           cursor: pointer;
           margin-right: auto;
         }
-        #examples h2 {
-          display: inline-block;
-          border-bottom: 1px solid #eee;
-          padding-bottom: 3px;
-          margin-bottom: 12px;
-          letter-spacing: 0.03em;
+
+        #examples {
+          display: grid;
         }
+
         .comp {
           border-left: 1px solid #eee;
-          padding: 0 0 0 12px;
-          margin-left: 12px;
+          padding: 0 0 0 20px;
+          margin-left: 5px;
+          margin-top: 10px;
         }
     `)
   }

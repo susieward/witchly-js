@@ -87,13 +87,12 @@ function parseElements(domEls, vm, parentId = null) {
       _parseConditionalExp(el)
     }
 
-    if (el.hasChildNodes()) {
+    if (el.children?.length > 0) {
       const children = parseElements(el.children, vm, id)
       el.children = children
     }
 
-    const attrs = el.getAttributeNames()
-    const listeners = attrs.filter(a => {
+    const listeners = el.getAttributeNames().filter(a => {
       return a.toLowerCase().includes('on') || a.startsWith(':')
     })
     if (listeners.length > 0) {

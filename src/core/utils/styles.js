@@ -1,9 +1,10 @@
 
 const toKebabCase = (str) => str.replace(/[A-Z]/g, "-$&").toLowerCase()
+const mapKeys = (obj) => Object.keys(obj).map(k => `${toKebabCase(k)}: ${obj[k]};`)
 
 class StyleSheet extends CSSStyleSheet {
   replaceSync(cssVal) {
-    if (typeof cssVal === 'object') {
+    if (cssVal?.constructor?.name === 'Object') {
       cssVal = this.toCSSText(cssVal)
     }
     super.replaceSync(cssVal)
@@ -12,21 +13,16 @@ class StyleSheet extends CSSStyleSheet {
 
   toCSSText(styleMap) {
     return Object.entries(styleMap).map(([key, val]) => {
-      return (
-        `${key} { ${Object.keys(val).map(k => `${toKebabCase(k)}: ${val[k]};`).join(' ')} }`
-      )
+      return (`${key} { ${mapKeys(val).join(' ')} }`)
     }).join('\n')
   }
 }
 
 function initStyles(vm, doc) {
-  let styles = []
-  if (vm._options.styles) {
-    styles.push(vm._options.styles)
-  }
+  let styles = vm._options.styles ? [vm._options.styles] : []
   if (doc.styleSheets.length > 0) {
     const docStyles = [...doc.styleSheets].map(s => s.ownerNode.innerText)
-    styles.push(...docStyles)
+    styles = [...styles, ...docStyles]
   }
   if (styles.length > 0) {
     const constructedStyles = styles.map(cssVal => {

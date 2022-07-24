@@ -1,4 +1,5 @@
 const { observe } = require('./proxy')
+const { initStyles } = require('./styles')
 
 function initOptions(options, vm, callback) {
   const staticProps = ['name', 'components', 'constructor']
@@ -27,6 +28,7 @@ function initOptions(options, vm, callback) {
   if (watchedProps.length > 0) {
     _defineWatchers(watchedProps, descriptors, vm)
   }
+  initStyles(vm, window.document)
   return vm
 }
 

@@ -1,32 +1,42 @@
 const { parse } = require('./utils/parser')
 const { update } = require('./utils/reactivity')
 const { initOptions } = require('./utils/options')
-const { initStyles } = require('./utils/styles')
 
 class Base extends HTMLElement {
   constructor() {
     super()
-    initOptions(this._options, this, this.#_update)
-    if (this._options.createdCallback) {
-      this._options.createdCallback.call(this)
-    }
+    this.attachShadow({ mode: 'open' })
+    this.#init()
   }
 
   get $router() {
     return this._root?.router
   }
 
+  get $root() {
+    return this._root._el
+  }
+
+  #init() {
+    try {
+      initOptions(this._options, this, this.#update)
+      if (this._options.createdCallback) {
+        this._options.createdCallback.call(this)
+      }
+    } catch(err) {
+      console.error(err)
+    }
+  }
+
   connectedCallback() {
-    this.#_render()
+    return this.#render().catch(e => console.error(e))
   }
 
   attributeChangedCallback(name, oldVal, newVal) {
-    this.#_update(name, newVal, oldVal)
+    this.#update(name, newVal, oldVal)
   }
 
-  async #_render() {
-    this.attachShadow({ mode: 'open' })
-    initStyles(this, document)
+  async #render() {
     const dom = await parse(this.template, this)
     this.shadowRoot.append(dom)
     if (this._options.connectedCallback) {
@@ -34,7 +44,7 @@ class Base extends HTMLElement {
     }
   }
 
-  #_update(prop, newVal, oldVal) {
+  #update(prop, newVal, oldVal) {
     return update(prop, newVal, oldVal, this)
   }
 

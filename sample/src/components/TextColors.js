@@ -11,9 +11,9 @@ export default class TextColors {
     const style = `color: ${this.color}`
     return (
       <div>
-        <p style={style}>
+        <span style={style}>
           I'm some text!
-        </p>
+        </span>
         <div>
           <p>Text colors: {this.colorsList}</p>
           <p>

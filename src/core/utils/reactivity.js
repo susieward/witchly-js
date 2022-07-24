@@ -31,7 +31,7 @@ function _processMatches(matches, newVal) {
   matches = matches.reverse()
 
   for (const [index, match] of matches.entries()) {
-    const { oldEl, newEl } = match
+    const { newEl, oldEl } = match
 
     if (index > 0) {
       const prev = matches[index - 1]
@@ -46,6 +46,12 @@ function _processMatches(matches, newVal) {
       _processInnerText(newEl, oldEl, newVal)
     } else {
       if (newEl.hasChildNodes() || oldEl.hasChildNodes()) {
+        if ((newEl.hasChildNodes() && !oldEl.hasChildNodes())
+          || (!newEl.hasChildNodes() && oldEl.hasChildNodes())
+        ) {
+          oldEl.replaceWith(newEl)
+          break
+        }
         compareNodes(newEl, oldEl, newVal)
       }
     }

@@ -2,10 +2,10 @@
 export default class CodeEditor {
   name = 'code-editor'
   defaultContent = '<p>Edit me!</p>'
-  templateHTML = ''
+  outputHTML = ''
 
   watch = {
-    templateHTML: {
+    outputHTML: {
       handler(newVal) {
         this.$querySelector('#output').innerHTML = newVal
       }
@@ -13,16 +13,15 @@ export default class CodeEditor {
   }
 
   connectedCallback() {
-    this.templateHTML = this.$querySelector('textarea').value
+    this.outputHTML = this.$querySelector('textarea').value
   }
 
   get template() {
     return (
       <div>
         <textarea
-          id="editor"
           rows="10"
-          oninput={(e) => this.templateHTML = e.target.value}>
+          oninput={(e) => this.outputHTML = e.target.value}>
           {this.defaultContent}
         </textarea>
         <button onclick={() => this.reset()}>reset</button>
@@ -33,17 +32,20 @@ export default class CodeEditor {
 
   reset() {
     this.$querySelector('textarea').value = this.defaultContent
-    this.templateHTML = this.defaultContent
+    this.outputHTML = this.defaultContent
   }
 
   get styles() {
     return {
       textarea: {
+        display: 'block',
         minHeight: '200px',
         width: '100%',
+        maxWidth: '800px',
         border: '1px solid #eee',
-        marginTop: '20px',
-        padding: '10px',
+        borderRadius: '0.3em',
+        margin: '20px 0',
+        padding: '20px',
         letterSpacing: '0.03em',
         fontSize: '16px'
       },

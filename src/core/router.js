@@ -1,42 +1,22 @@
 const { registerComponent } = require('./components')
 
 class RouterView extends HTMLElement {
-  static #routes = []
-  static #root = null
-
-  static get _routes() {
-    return this.#routes
-  }
-
-  static set _routes(value) {
-    if (this.#routes.length === 0) {
-      return this.#routes = value
-    }
-    return false
-  }
-
-  static get _root() {
-    return this.#root
-  }
-
-  static set _root(value) {
-    return !this.#root ? this.#root = value : false
-  }
-
   #components = {}
-  #location = window.location
-  #history = window.history
 
   constructor() {
     super()
     window.onpopstate = () => {
-      this._render()
+      this.#render()
     }
     this.attachShadow({ mode: 'open' })
   }
 
-  get routes() {
-    return this.constructor._routes
+  get history() {
+    return window.history
+  }
+
+  get location() {
+    return window.location
   }
 
   get currentRoute() {
@@ -48,32 +28,23 @@ class RouterView extends HTMLElement {
   }
 
   get _basePath() {
-    return `${this.#location.protocol}//${this.#location.host}`
-  }
-
-  get _root() {
-    return this.constructor._root
+    return `${this.location.protocol}//${this.location.host}`
   }
 
   get _path() {
-    return this.#location.pathname
-  }
-
-  get _currentComponent() {
-    return this.#components[this.currentRoute.name]
+    return this.location.pathname
   }
 
   connectedCallback() {
-    this.push(this.currentRoute)
+    this.#render()
   }
 
-  async _render() {
-    let comp = this.#components[this.currentRoute.name]
-    if (!comp) {
-      comp = await registerComponent(this.currentRoute.component, this._root)
+  async #render() {
+    if (!this._currentComponent) {
+      const comp = await registerComponent(this.currentRoute.component, this._root)
       this.#components[this.currentRoute.name] = comp
     }
-    const el = new comp._ctor()
+    const el = new this._currentComponent._ctor()
     if (this.shadowRoot.hasChildNodes()) {
       this.shadowRoot.firstChild.replaceWith(el)
     } else {
@@ -84,20 +55,10 @@ class RouterView extends HTMLElement {
   push(data) {
     const match = this._match(data)
     if (match) {
-      const routeRecord = {
-        prev: {
-          name: this.currentRoute.name,
-          path: this.currentRoute.path,
-          component: this._currentComponent?.name,
-          fullPath: `${this._basePath}${this.currentRoute.path}`
-        },
-        name: match.name,
-        path: match.path,
-        fullPath: `${this._basePath}${match.path}`
-      }
+      const routeRecord = this._buildRouteRecord(match)
       const newPath = `${this._basePath}${match.path}`
-      this.#history.pushState(routeRecord, null, newPath)
-      this._render()
+      this.history.pushState(routeRecord, null, newPath)
+      this.#render()
     } else {
       throw new Error(`Router: push: Path for route record could not be found`)
     }
@@ -112,6 +73,21 @@ class RouterView extends HTMLElement {
     }
     return this.routes.find(r => r.path === path)
   }
+
+  _buildRouteRecord(match) {
+    const routeRecord = {
+      prev: {
+        name: this.currentRoute.name,
+        path: this.currentRoute.path,
+        component: this._currentComponent?.name,
+        fullPath: `${this._basePath}${this.currentRoute.path}`
+      },
+      name: match.name,
+      path: match.path,
+      fullPath: `${this._basePath}${match.path}`
+    }
+    return routeRecord
+  }
 }
 
 class WitchlyRouter {
@@ -119,9 +95,17 @@ class WitchlyRouter {
 
   constructor({ routes }, root) {
     this.#root = root
-    RouterView._routes = routes
-    RouterView._root = root
-    customElements.define('router-view', RouterView)
+    customElements.define('router-view',
+      class extends RouterView {
+        get routes() {
+          return routes
+        }
+
+        get _root() {
+          return root
+        }
+      }
+    )
   }
 
   get #view() {
