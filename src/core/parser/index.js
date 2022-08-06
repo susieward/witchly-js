@@ -1,80 +1,29 @@
-
-function createElementJSX(tag, props = {}, ...children) {
-  if (props?.children) {
-    children = Array.isArray(props.children) ? props.children : [props.children]
-  }
-  if (typeof tag === 'object' && tag?.default) {
-    tag = tag.default
-  }
-  if (typeof tag === 'function') {
-    return _processTag(tag, props, children)
-  }
-  const element = document.createElement(tag)
-  for (const [name, value] of Object.entries(props)) {
-    if (name.startsWith('on')) {
-      element.addEventListener(name.toLowerCase().substr(2), value)
-    } else if (name !== 'children') {
-      element.setAttribute(name, value?.toString() || '')
-    }
-  }
-  if (children.length > 0) {
-    _appendChild(element, children).catch(e => console.error(e))
-  }
-  return element
-}
-
-async function _appendChild(parent, child) {
-  if (!child) {
-    return
-  } else if (Array.isArray(child)) {
-    await Promise.all(child.map(c => _appendChild(parent, c)))
-  } else if (child.constructor.name === 'Promise') {
-    await child.then(c => _appendChild(parent, c))
-  } else {
-    parent.appendChild(child.nodeType ? child : document.createTextNode(child))
-  }
-}
-
-function _processTag(tag, props, children) {
-  const result = !tag.prototype ? tag(props, children) : new tag(props, children)
-  if (result.constructor.name === 'Promise') {
-    return _processTagAsync(result, props, children)
-  }
-  return result?.render?.call(result) || result
-}
-
-async function _processTagAsync(tag, props, children) {
-  tag = await tag.then(r => r?.default || r)
-  return _processTag(tag, props, children)
-}
-
-function createFragmentJSX(props, ...children) {
-  if (props?.children) {
-    children = Array.isArray(props.children) ? props.children : [props.children]
-  }
-  return children
-}
+const { createElementJSX, createFragmentJSX } = require('./jsx')
 
 async function parse(val, vm) {
   if (!val) {
-    throw new Error(`Cannot parse invalid value: ${JSON.stringify(val)}`)
+    throw new Error(`Cannot parse invalid template value: ${JSON.stringify(val)}`)
   }
   let result = ''
-  if (val.constructor.name === 'Promise') {
-    result = await val.then(result => parse(result, vm))
-  } else if (typeof val === 'object') {
-    result = _isElement(val) ? parseElements([val], vm) : parseAST(val, vm)
-  } else if (typeof val === 'string') {
-    result = parseTemplateString(val, vm)
+  try {
+    if (val.constructor.name === 'Promise') {
+      result = await val.then(result => parse(result, vm))
+    } else if (typeof val === 'object') {
+      result = _isElement(val) ? processElements([val], vm) : parseAST(val, vm)
+    } else if (typeof val === 'string') {
+      result = parseTemplateString(val, vm)
+    }
+    return result
+  } catch (err) {
+    console.error(err)
   }
-  return result
 }
 
 function _isElement(val) {
   return val.childNodes?.constructor?.name === 'NodeList'
 }
 
-function parseElements(domEls, vm, parentId = null) {
+function processElements(domEls, vm, parentId = null) {
   let count = 0
   const els = []
 
@@ -88,7 +37,7 @@ function parseElements(domEls, vm, parentId = null) {
     }
 
     if (el.children?.length > 0) {
-      const children = parseElements(el.children, vm, id)
+      const children = processElements(el.children, vm, id)
       el.children = children
     }
 
@@ -165,7 +114,7 @@ function parseTemplateString(template, vm) {
   const temp = document.createElement('template')
   temp.innerHTML = template
   const domChildren = temp.content.cloneNode(true)
-  const output = parseElements(domChildren.children, vm)
+  const output = processElements(domChildren.children, vm)
   return output
 }
 

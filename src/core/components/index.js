@@ -1,4 +1,4 @@
-const Base = require('./base')
+const BaseComponent = require('./base')
 
 function createComponent(_options, root = null) {
   const options = _preprocess(_options, root)
@@ -20,7 +20,7 @@ function _preprocess(options, root = null) {
     options = (!options.prototype) ? options() : new options()
   }
   if (options.constructor.name === 'Promise') {
-    return options.then(r => r)
+    return options.then(r => r).catch(e => console.error(e))
   }
   if (options.components || options.constructor.components) {
     registerComponents(options, root)
@@ -31,7 +31,11 @@ function _preprocess(options, root = null) {
 async function registerComponents(options, root = null) {
   const comps = options.components || options.constructor?.components
   const values = Object.values(comps)
-  await Promise.all(values.map(comp => registerComponent(comp, root)))
+  try {
+    await Promise.all(values.map(comp => registerComponent(comp, root)))
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 async function registerComponent(_options, root) {
@@ -40,7 +44,7 @@ async function registerComponent(_options, root) {
 }
 
 function _createCtor(options, root = null) {
-  return class extends Base {
+  return class extends BaseComponent {
     static get observedAttributes() {
       return options.observedAttributes || options.constructor.observedAttributes
     }
@@ -51,19 +55,6 @@ function _createCtor(options, root = null) {
 
     get _root() {
       return root
-    }
-
-    disconnectedCallback() {
-      if (this._options.disconnectedCallback) {
-        this._options.disconnectedCallback.call(this)
-      }
-    }
-
-    attributeChangedCallback(...args) {
-      super.attributeChangedCallback(...args)
-      if (this._options.attributeChangedCallback) {
-        this._options.attributeChangedCallback.call(this, ...args)
-      }
     }
   }
 }

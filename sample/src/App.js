@@ -19,7 +19,9 @@ const App = () => {
         <div id="app">
           <app-header></app-header>
           <main class="main">
-            <Sidenav vm={this} links={links}>
+            <Sidenav
+              class="sidenav"
+              onclick={(path) => this.$go(path)} links={links}>
               <button onclick={() => this.hi()}>
                 hi
               </button>
@@ -31,6 +33,43 @@ const App = () => {
     },
     hi() {
       this.$querySelector('aside').appendChild(<span>hi</span>)
+    },
+    get styles() {
+      return (`
+        #app {
+          display: grid;
+          grid-row-gap: 50px;
+          min-width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+
+        .main {
+          display: grid;
+          justify-content: center;
+          align-content: flex-start;
+          grid-template-areas: 'sidenav content';
+          grid-auto-rows: auto;
+          grid-column-gap: 45px;
+          grid-row-gap: 20px;
+          width: 100%;
+          max-width: 1250px;
+          min-height: auto;
+          margin: 0 auto;
+        }
+
+        .sidenav {
+          grid-area: sidenav;
+          display: grid;
+          align-content: flex-start;
+          width: 260px;
+          background-color: var(--content-bg-color);
+          border: var(--content-border);
+          border-radius: 5px;
+          padding: 12px 20px;
+          height: auto;
+        }`
+      )
     }
   }
 }

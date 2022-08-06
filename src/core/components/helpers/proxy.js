@@ -5,7 +5,10 @@ class Observer {
     this._callback = callback
     this._ref = ref
     this._obj = this.init(obj)
-    // console.log(this)
+  }
+
+  get parentEl() {
+    return this.getParentEl()
   }
 
   init(obj) {
@@ -26,7 +29,7 @@ class Observer {
         }
       } else if (desc.hasOwnProperty('get') && typeof desc.get !== 'undefined') {
         const getter = desc.get
-        const vm = this.getParentEl()
+        const vm = this.parentEl
         const value = getter.bind(vm)
         Object.defineProperty(obj, key, {
           get() {
@@ -40,6 +43,9 @@ class Observer {
     const self = this
     return new Proxy(obj, {
       get(target, prop) {
+        if (prop === 'toJSON') {
+          return () => target
+        }
         return target[prop]
       },
       set(target, prop, value) {
@@ -50,17 +56,12 @@ class Observer {
   }
 
   _handler(target, prop, newVal, oldVal) {
-    if (this._ref) {
-      if (this._parent['_obj'] && this._parent._obj[this._ref]) {
-        oldVal = this._parent._obj[this._ref]
-        target[prop] = newVal
-        newVal = target
-        this._callback.call(this._parent, this._ref, newVal, oldVal)
-        return true
-      }
-    }
+    const vm = this.parentEl
     target[prop] = newVal
     this._callback.call(this._parent, prop, newVal, oldVal)
+    if (vm.watch && vm.watch[prop]) {
+      vm.watch[prop].handler.call(vm, newVal, oldVal)
+    }
     return true
   }
 

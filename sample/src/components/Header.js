@@ -12,7 +12,9 @@ const Title = (props) => {
 
 export default class Header {
   name = 'app-header'
-  state = () => ({ textVal: '' })
+  state = () => ({
+    textVal: ''
+  })
   defaultTitle = 'lightweight, hyper-flexible web components'
 
   connectedCallback() {
@@ -50,5 +52,37 @@ export default class Header {
     this.textVal = ''
     this.inputEl.value = ''
     this.inputEl.placeholder = 'Type something'
+  }
+
+  get styles() {
+    return (`
+      #header {
+        display: grid;
+        min-width: 100%;
+        letter-spacing: 0.03em;
+        grid-auto-flow: column;
+        align-content: center;
+        background-color: var(--content-bg-color);
+        border-bottom: var(--content-border);
+        padding: 20px 28px;
+      }
+
+      .header-right {
+        display: grid;
+        margin-left: auto;
+        justify-content: flex-end;
+        align-content: center;
+        grid-auto-flow: column;
+        grid-column-gap: 15px;
+      }
+
+      .title-container {
+        display: grid;
+        justify-content: flex-start;
+        grid-auto-flow: column;
+        align-content: center;
+        grid-column-gap: 15px;
+      }`
+    )
   }
 }

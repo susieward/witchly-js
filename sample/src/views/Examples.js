@@ -13,7 +13,7 @@ export default class Examples {
       {
         id: 1,
         title: 'Text Colors (1)',
-        show: false,
+        state: { show: false },
         get template() {
           return <text-colors></text-colors>
         }
@@ -21,7 +21,7 @@ export default class Examples {
       {
         id: 2,
         title: 'Text Colors (2)',
-        show: false,
+        state: { show: false },
         get template() {
           return <text-colors></text-colors>
         }
@@ -29,7 +29,7 @@ export default class Examples {
       {
         id: 3,
         title: 'List Items',
-        show: false,
+        state: { show: false },
         get template() {
           return (
             <div>
@@ -48,7 +48,7 @@ export default class Examples {
       {
         id: 4,
         title: 'AST-based Component',
-        show: false,
+        state: { show: false },
         get template() {
           return <ast-component></ast-component>
         }
@@ -81,7 +81,7 @@ export default class Examples {
             {comp.title}
           </span>
           <div class="comp">
-            {comp.show === true ? comp.template : ''}
+            {comp.state.show === true ? comp.template : ''}
           </div>
         </div>
       )
@@ -110,7 +110,7 @@ export default class Examples {
   }
 
   toggleComp(comp) {
-    return comp.show = !comp.show
+    return comp.state.show = !comp.state.show
   }
 
   addListItem(text) {

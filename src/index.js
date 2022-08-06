@@ -1,5 +1,5 @@
 const {
-  WitchlyRouter,
+  Router,
   createComponent,
   createElementJSX,
   createFragmentJSX
@@ -10,7 +10,7 @@ class Witchly {
 
   constructor(options) {
     if (options.router) {
-      this.router = new WitchlyRouter(options.router, this)
+      this.router = new Router(options.router, this)
     }
     const comp = Witchly.component(options.render(), this)
     const el = document.getElementById(options.id)

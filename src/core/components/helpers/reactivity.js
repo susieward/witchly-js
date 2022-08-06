@@ -1,16 +1,14 @@
-const { parse } = require('./parser')
 
 async function update(prop, newVal, oldVal, vm) {
-  if (!vm.shadowRoot?.firstChild) return
   // TO DO: deep object/array equality checking
   if (typeof newVal === typeof oldVal) {
     if (newVal === oldVal) return
   }
 
-  const newDom = await parse(vm.template, vm)
+  const newDom = await vm._parse()
   const oldDom = vm.shadowRoot.firstChild
 
-  if (!newVal || typeof newVal === 'object') newVal = null
+  if (!newVal || typeof newVal !== 'string') newVal = null
   compareNodes(newDom, oldDom, newVal)
 }
 

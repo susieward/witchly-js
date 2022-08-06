@@ -19,12 +19,12 @@ export default class ListItems {
 
   get currentItems() {
     if (!this.items) return
-    return this.items.split(',').map((item, i) => {
+    return this.items.map((item, i) => {
       return (
         <li
           data-index={i}
           onclick={() => this.$emit('remove', i)}>
-          {item} {i}
+          {item}
         </li>
       )
     })

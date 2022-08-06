@@ -21,7 +21,9 @@ function initOptions(options, vm, callback) {
     }
   }
 
-  _defineAttrs(vm, options)
+  if (vm.hasAttributes()) {
+    _defineAttrs(vm, options)
+  }
   if (descriptors.state) {
     _defineState(descriptors.state, vm, callback)
   }
@@ -72,8 +74,10 @@ function _defineState(desc, vm, callback) {
 }
 
 function _defineWatchers(watchedProps, descriptors, vm) {
-  // TO DO: be able to watch a prop defined on the state object
   for (const prop of watchedProps) {
+    if (vm.hasOwnProperty(prop)) {
+      continue
+    }
     const desc = descriptors[prop]
     Object.defineProperty(vm, prop, {
       get() {
@@ -98,36 +102,23 @@ function _defineWatchers(watchedProps, descriptors, vm) {
 }
 
 function _defineAttrs(vm, options) {
-  const observedAttrs = options.observedAttributes || vm.constructor?.observedAttributes
-  let attrs = vm.getAttributeNames()
+  const attrs = vm.getAttributeNames()
+  const observedAttrs = options.observedAttributes
+    || vm.constructor?.observedAttributes
+    || []
+  const uniqueAttrs = Array.from(new Set([...attrs, ...observedAttrs]))
 
-  if (observedAttrs?.length > 0) {
-    for (const attr of observedAttrs) {
-      Object.defineProperty(vm, attr, {
-        get() {
-          return vm.getAttribute(attr)
-        },
-        enumerable: true,
-        configureable: true
-      })
-    }
-  }
-
-  if (attrs.length > 0) {
-    const defined = observedAttrs || []
-    attrs = attrs.filter(a => !defined.includes(a))
-    for (const attr of attrs) {
-      Object.defineProperty(vm, attr, {
-        get() {
-          return vm.getAttribute(attr)
-        },
-        set(newVal) {
-          return vm.setAttribute(attr, newVal)
-        },
-        enumerable: true,
-        configureable: true
-      })
-    }
+  for (const attr of uniqueAttrs) {
+    Object.defineProperty(vm, attr, {
+      get() {
+        return vm.getAttribute(attr)
+      },
+      set(newVal) {
+        return vm.setAttribute(attr, newVal)
+      },
+      enumerable: true,
+      configureable: true
+    })
   }
 }
 
