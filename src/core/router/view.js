@@ -8,6 +8,7 @@ class RouterView extends HTMLElement {
     window.onpopstate = () => {
       this.#render()
     }
+    this.attachShadow({ mode: 'open' })
   }
 
   get history() {
@@ -44,10 +45,11 @@ class RouterView extends HTMLElement {
       this.#components[this.currentRoute.name] = comp
     }
     const el = new this._currentComponent._ctor()
-    if (this.hasChildNodes()) {
-      this.replaceChildren()
+    if (this.shadowRoot.firstChild) {
+      this.shadowRoot.firstChild.replaceWith(el)
+    } else {
+      this.shadowRoot.append(el)
     }
-    this.append(el)
   }
 
   async push(data) {
@@ -58,7 +60,7 @@ class RouterView extends HTMLElement {
       this.history.pushState(routeRecord, null, newPath)
       await this.#render()
     } else {
-      throw new Error(`Router: push: Path for route record could not be found`)
+      throw new Error(`Router: Path for route record could not be found`)
     }
   }
 }

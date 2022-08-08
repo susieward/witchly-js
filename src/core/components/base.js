@@ -4,11 +4,11 @@ const { initOptions } = require('./helpers/options')
 
 class BaseComponent extends HTMLElement {
   get $router() {
-    return this._root?.router
+    return this._root?.router || this.$root.$router
   }
 
   get $root() {
-    return this._root._el
+    return document.querySelector('[data-root=true]')
   }
 
   connectedCallback() {
@@ -66,11 +66,21 @@ class BaseComponent extends HTMLElement {
   }
 
   setAttribute(attr, newVal) {
+    if (['data-id', 'data-root'].includes(attr) && this.hasAttribute(attr)) {
+      throw new Error(`Cannot redefine static attribute: ${attr}`)
+    }
     let val = newVal?.toString() || ''
     if (newVal?.constructor?.name !== 'String') {
       val = JSON.stringify(newVal)
     }
     return super.setAttribute(attr, val)
+  }
+
+  removeAttribute(attr) {
+    if (['data-id', 'data-root'].includes(attr)) {
+      throw new Error(`Cannot remove static attribute: ${attr}`)
+    }
+    super.removeAttribute(attr)
   }
 
   $emit(evtName, ...args) {

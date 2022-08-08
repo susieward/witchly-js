@@ -43,15 +43,11 @@ function _processMatches(matches, newVal) {
     if (newVal) {
       _processInnerText(newEl, oldEl, newVal)
     } else {
-      if (newEl.hasChildNodes() || oldEl.hasChildNodes()) {
-        if ((newEl.hasChildNodes() && !oldEl.hasChildNodes())
-          || (!newEl.hasChildNodes() && oldEl.hasChildNodes())
-        ) {
-          oldEl.replaceWith(newEl)
-          break
-        }
-        compareNodes(newEl, oldEl, newVal)
+      if (newEl.childNodes.length !== oldEl.childNodes.length) {
+        oldEl.replaceChildren(...newEl.childNodes)
+        break
       }
+      compareNodes(newEl, oldEl, newVal)
     }
   }
 }

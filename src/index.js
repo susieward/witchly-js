@@ -6,20 +6,19 @@ const {
 } = require('./core')
 
 class Witchly {
-  #el = null
-
   constructor(options) {
     if (options.router) {
       this.router = new Router(options.router, this)
     }
     const comp = Witchly.component(options.render(), this)
     const el = document.getElementById(options.id)
-    el.replaceWith(new comp._ctor())
-    this.#el = document.querySelector(`${comp.name}`)
+    const newEl = new comp._ctor()
+    newEl.dataset.root = true
+    el.replaceWith(newEl)
   }
 
   get _el() {
-    return this.#el
+    return document.querySelector('[data-root=true]')
   }
 
   static component(options, root) {

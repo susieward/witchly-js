@@ -12,9 +12,7 @@ const Title = (props) => {
 
 export default class Header {
   name = 'app-header'
-  state = () => ({
-    textVal: ''
-  })
+  state = () => ({ textVal: '' })
   defaultTitle = 'lightweight, hyper-flexible web components'
 
   connectedCallback() {

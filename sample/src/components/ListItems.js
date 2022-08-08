@@ -1,14 +1,22 @@
 
 export default class ListItems {
   name = 'list-items'
-  message = 'hello from a child component!'
+  message = ''
 
   static get observedAttributes() {
     return ['items']
   }
 
+  createdCallback() {
+    this.message = 'hello from a child component!'
+  }
+
   connectedCallback() {
     this.$emit('message', this.message)
+  }
+
+  disconnectedCallback() {
+    this.$emit('message', 'bye!')
   }
 
   get template() {

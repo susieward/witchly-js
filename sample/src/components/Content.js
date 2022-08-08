@@ -1,6 +1,5 @@
-export default class Content {
-  name = 'app-content'
-
+export default {
+  name: 'app-content',
   get template() {
     return (
       <div class="content">
@@ -8,8 +7,7 @@ export default class Content {
         <slot></slot>
       </div>
     )
-  }
-
+  },
   get styles() {
     return (
       `.content {
