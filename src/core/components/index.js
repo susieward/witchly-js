@@ -1,7 +1,7 @@
 const BaseComponent = require('./base')
 
-function createComponent(_options, root = null) {
-  const options = _preprocess(_options, root)
+async function createComponent(_options, root = null) {
+  const options = await _preprocess(_options, root)
   const comp = {
     name: options.name,
     _ctor: _createCtor(options, root)
@@ -12,7 +12,7 @@ function createComponent(_options, root = null) {
   return comp
 }
 
-function _preprocess(options, root = null) {
+async function _preprocess(options, root = null) {
   if (options.hasOwnProperty('default')) {
     options = options.default
   }
@@ -20,10 +20,10 @@ function _preprocess(options, root = null) {
     options = (!options.prototype) ? options() : new options()
   }
   if (options.constructor.name === 'Promise') {
-    return options.then(r => r).catch(e => console.error(e))
+    return options.then(r => _preprocess(r?.default || r))
   }
   if (options.components || options.constructor.components) {
-    registerComponents(options, root)
+    await registerComponents(options, root)
   }
   return options
 }
@@ -31,16 +31,8 @@ function _preprocess(options, root = null) {
 async function registerComponents(options, root = null) {
   const comps = options.components || options.constructor?.components
   const values = Object.values(comps)
-  try {
-    await Promise.all(values.map(comp => registerComponent(comp, root)))
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-async function registerComponent(_options, root) {
-  const options = await _preprocess(_options, root)
-  return createComponent(options, root)
+  const promises = values.map(comp => createComponent(comp, root))
+  return Promise.all(promises).catch(err => console.error(err))
 }
 
 function _createCtor(options, root = null) {
@@ -59,4 +51,4 @@ function _createCtor(options, root = null) {
   }
 }
 
-module.exports = { createComponent, registerComponent }
+module.exports = { createComponent }

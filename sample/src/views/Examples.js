@@ -1,10 +1,9 @@
 const TextColors = () => import('@/components/TextColors')
 const ListItems = () => import('@/components/ListItems')
-const ASTComponent = () => import ('@/components/ASTComponent')
 
 export default class Examples {
-  name = 'app-examples'
-  components = { TextColors, ListItems, ASTComponent }
+  name = 'examples-view'
+  components = { TextColors, ListItems }
   title = 'Examples'
   state = () => ({
     items: [],
@@ -13,7 +12,7 @@ export default class Examples {
       {
         id: 1,
         title: 'Text Colors (1)',
-        state: { show: false },
+        show: false,
         get template() {
           return <text-colors></text-colors>
         }
@@ -21,7 +20,7 @@ export default class Examples {
       {
         id: 2,
         title: 'Text Colors (2)',
-        state: { show: false },
+        show: false,
         get template() {
           return <text-colors></text-colors>
         }
@@ -29,7 +28,7 @@ export default class Examples {
       {
         id: 3,
         title: 'List Items',
-        state: { show: false },
+        show: false,
         get template() {
           return (
             <div>
@@ -43,14 +42,6 @@ export default class Examples {
               </list-items>
             </div>
           )
-        }
-      },
-      {
-        id: 4,
-        title: 'AST-based Component',
-        state: { show: false },
-        get template() {
-          return <ast-component></ast-component>
         }
       }
     ]
@@ -81,11 +72,23 @@ export default class Examples {
             {comp.title}
           </span>
           <div class="comp">
-            {comp.state.show === true ? comp.template : ''}
+            {comp.show === true ? comp.template : ''}
           </div>
         </div>
       )
     })
+  }
+
+  toggleComp(comp) {
+    return comp.show = !comp.show
+  }
+
+  addListItem(text) {
+    this.items.push(text)
+  }
+
+  removeItem(index) {
+    this.items.splice(index, 1)
   }
 
   get styles() {
@@ -107,17 +110,5 @@ export default class Examples {
           margin-top: 10px;
         }
     `)
-  }
-
-  toggleComp(comp) {
-    return comp.state.show = !comp.state.show
-  }
-
-  addListItem(text) {
-    this.items.push(text)
-  }
-
-  removeItem(index) {
-    this.items.splice(index, 1)
   }
 }

@@ -1,8 +1,8 @@
 const { observe } = require('./proxy')
 const { initStyles } = require('./styles')
+const staticProps = ['name', 'components', 'constructor']
 
 function initOptions(options, vm, callback) {
-  const staticProps = ['name', 'components', 'constructor']
   const descriptors = _buildDescriptorsObject(options)
   const watchedProps = options.watch ? Object.keys(options.watch) : []
 

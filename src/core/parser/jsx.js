@@ -3,7 +3,7 @@ function createElementJSX(tag, props = {}, ...children) {
   if (props?.children) {
     children = Array.isArray(props.children) ? props.children : [props.children]
   }
-  if (typeof tag === 'object' && tag?.default) {
+  if (tag?.default) {
     tag = tag.default
   }
   if (typeof tag === 'function') {
@@ -15,10 +15,9 @@ function createElementJSX(tag, props = {}, ...children) {
     if (name.startsWith('on')) {
       element.addEventListener(name.toLowerCase().substr(2), value)
     } else if (name !== 'children') {
-      let val = value?.toString() || ''
-      if (value?.constructor?.name !== 'String') {
-        val = JSON.stringify(value)
-      }
+      const val = (value?.constructor?.name !== 'String')
+        ? JSON.stringify(value)
+        : value?.toString() || ''
       element.setAttribute(name, val)
     }
   }

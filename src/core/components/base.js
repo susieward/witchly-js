@@ -1,6 +1,7 @@
 const { parse } = require('../parser')
 const { update } = require('./helpers/reactivity')
 const { initOptions } = require('./helpers/options')
+const staticAttrs = ['data-id', 'data-root']
 
 class BaseComponent extends HTMLElement {
   get $router() {
@@ -8,7 +9,7 @@ class BaseComponent extends HTMLElement {
   }
 
   get $root() {
-    return document.querySelector('[data-root=true]')
+    return this._root?._el || document.querySelector('[data-root=true]')
   }
 
   connectedCallback() {
@@ -36,8 +37,8 @@ class BaseComponent extends HTMLElement {
 
   async attributeChangedCallback(name, oldVal, newVal) {
     if (!this.isConnected) return
-    newVal = _parseAttrValue(newVal)
-    oldVal = _parseAttrValue(oldVal)
+    newVal = _parseValue(newVal)
+    oldVal = _parseValue(oldVal)
     await this.#update(name, newVal, oldVal)
     if (this._options.attributeChangedCallback) {
       this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
@@ -57,30 +58,29 @@ class BaseComponent extends HTMLElement {
   }
 
   _parse() {
-    return parse(this.template, this)
+    return parse(this.template, this).catch(err => console.error(err))
   }
 
   getAttribute(attr) {
     const val = super.getAttribute(attr)
-    return _parseAttrValue(val)
+    return _parseValue(val)
   }
 
   setAttribute(attr, newVal) {
-    if (['data-id', 'data-root'].includes(attr) && this.hasAttribute(attr)) {
+    if (staticAttrs.includes(attr) && this.hasAttribute(attr)) {
       throw new Error(`Cannot redefine static attribute: ${attr}`)
     }
-    let val = newVal?.toString() || ''
-    if (newVal?.constructor?.name !== 'String') {
-      val = JSON.stringify(newVal)
-    }
+    const val = (newVal?.constructor?.name !== 'String')
+      ? JSON.stringify(newVal)
+      : newVal?.toString() || ''
     return super.setAttribute(attr, val)
   }
 
   removeAttribute(attr) {
-    if (['data-id', 'data-root'].includes(attr)) {
+    if (staticAttrs.includes(attr)) {
       throw new Error(`Cannot remove static attribute: ${attr}`)
     }
-    super.removeAttribute(attr)
+    return super.removeAttribute(attr)
   }
 
   $emit(evtName, ...args) {
@@ -113,7 +113,7 @@ class BaseComponent extends HTMLElement {
   }
 }
 
-function _parseAttrValue(value) {
+function _parseValue(value) {
   try {
     const parsed = JSON.parse(value)
     value = parsed

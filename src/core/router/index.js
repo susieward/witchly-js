@@ -1,7 +1,7 @@
 const RouterView = require('./view')
 
 class Router {
-  #root = null
+  #root
 
   constructor({ routes }, root) {
     this.#root = root
@@ -18,9 +18,12 @@ class Router {
     )
   }
 
+  get #el() {
+    return this.#root._el
+  }
+
   get #view() {
-    const app = this.#root._el
-    return app.shadowRoot.querySelector('router-view')
+    return this.#el.shadowRoot.querySelector('router-view')
   }
 
   push(data) {

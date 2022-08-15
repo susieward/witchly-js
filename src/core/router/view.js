@@ -1,4 +1,4 @@
-const { registerComponent } = require('../components')
+const { createComponent } = require('../components')
 
 class RouterView extends HTMLElement {
   #components = {}
@@ -41,7 +41,7 @@ class RouterView extends HTMLElement {
 
   async #render() {
     if (!this._currentComponent) {
-      const comp = await registerComponent(this.currentRoute.component, this._root)
+      const comp = await createComponent(this.currentRoute.component, this._root)
       this.#components[this.currentRoute.name] = comp
     }
     const el = new this._currentComponent._ctor()

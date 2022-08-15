@@ -21,18 +21,13 @@ const App = () => {
           <main class="main">
             <Sidenav
               class="sidenav"
-              onclick={(path) => this.$go(path)} links={links}>
-              <button onclick={() => this.hi()}>
-                hi
-              </button>
+              onclick={(path) => this.$go(path)}
+              links={links}>
             </Sidenav>
             <router-view></router-view>
           </main>
         </div>
       )
-    },
-    hi() {
-      this.$querySelector('aside').appendChild(<span>hi</span>)
     },
     get styles() {
       return (`

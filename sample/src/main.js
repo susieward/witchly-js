@@ -1,6 +1,6 @@
 import Witchly from 'witchly'
-import App from './App'
-import Content from './components/Content'
+const App = () => import('./App')
+const Content = () => import('./components/Content')
 import './main.css'
 import router from './router'
 
