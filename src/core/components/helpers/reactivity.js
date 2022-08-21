@@ -8,7 +8,7 @@ async function update(prop, newVal, oldVal, vm) {
   const newDom = await vm._parse()
   const oldDom = vm.shadowRoot.firstChild
 
-  if (!newVal || typeof newVal !== 'string') newVal = null
+  if (typeof newVal !== 'string') newVal = null
   compareNodes(newDom, oldDom, newVal)
 }
 
@@ -40,7 +40,7 @@ function _processMatches(matches, newVal) {
       _processAttrs(newEl, oldEl)
     }
 
-    if (newVal) {
+    if (newVal !== null) {
       _processInnerText(newEl, oldEl, newVal)
     } else {
       if (newEl.childNodes.length !== oldEl.childNodes.length) {

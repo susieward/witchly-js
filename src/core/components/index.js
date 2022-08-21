@@ -12,7 +12,7 @@ async function createComponent(_options, root = null) {
   return comp
 }
 
-async function _preprocess(options, root = null) {
+async function _preprocess(options, root) {
   if (options.hasOwnProperty('default')) {
     options = options.default
   }

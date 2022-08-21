@@ -2,21 +2,24 @@
 export default class ListItems {
   name = 'list-items'
   message = ''
+  watch = {
+    message: {
+      handler(newVal) {
+        this.$emit('message', newVal)
+      }
+    }
+  }
 
   static get observedAttributes() {
     return ['items']
   }
 
-  createdCallback() {
+  connectedCallback() {
     this.message = 'hello from a child component!'
   }
 
-  connectedCallback() {
-    this.$emit('message', this.message)
-  }
-
   disconnectedCallback() {
-    this.$emit('message', 'bye!')
+    this.message = 'bye!'
   }
 
   get template() {

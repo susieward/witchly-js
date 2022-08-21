@@ -27,7 +27,7 @@ class Router {
   }
 
   push(data) {
-    return this.#view.push(data)
+    return this.#view.push(data).catch(err => console.error(err))
   }
 }
 

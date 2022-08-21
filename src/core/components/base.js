@@ -18,7 +18,7 @@ class BaseComponent extends HTMLElement {
 
   async #render() {
     this.attachShadow({ mode: 'open' })
-    initOptions(this._options, this, this.#update)
+    initOptions(this, this.#update, window.document)
     if (this._options.createdCallback) {
       this._options.createdCallback.call(this)
     }
@@ -47,13 +47,9 @@ class BaseComponent extends HTMLElement {
 
   async #update(prop, newVal, oldVal) {
     if (!this.shadowRoot?.firstChild) return
-    try {
-      await update(prop, newVal, oldVal, this)
-      if (this.watch && this.watch[prop]) {
-        this.watch[prop].handler.call(this, newVal, oldVal)
-      }
-    } catch (err) {
-      console.error(err)
+    await update(prop, newVal, oldVal, this).catch(err => console.error(err))
+    if (this.watch && this.watch[prop]) {
+      this.watch[prop].handler.call(this, newVal, oldVal)
     }
   }
 

@@ -45,23 +45,21 @@ class RouterView extends HTMLElement {
       this.#components[this.currentRoute.name] = comp
     }
     const el = new this._currentComponent._ctor()
-    if (this.shadowRoot.firstChild) {
-      this.shadowRoot.firstChild.replaceWith(el)
-    } else {
-      this.shadowRoot.append(el)
+    if (!this.shadowRoot.firstChild) {
+      return this.shadowRoot.append(el)
     }
+    this.shadowRoot.firstChild.replaceWith(el)
   }
 
   async push(data) {
     const match = _match(data, this.routes)
-    if (match) {
-      const routeRecord = _buildRouteRecord(match, this)
-      const newPath = `${this._basePath}${match.path}`
-      this.history.pushState(routeRecord, null, newPath)
-      await this.#render()
-    } else {
+    if (!match) {
       throw new Error(`Router: Path for route record could not be found`)
     }
+    const routeRecord = _buildRouteRecord(match, this)
+    const newPath = `${this._basePath}${match.path}`
+    this.history.pushState(routeRecord, null, newPath)
+    await this.#render().catch(err => console.error(err))
   }
 }
 

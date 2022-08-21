@@ -30,8 +30,8 @@ const App = () => {
       )
     },
     get styles() {
-      return (`
-        #app {
+      return (
+        `#app {
           display: grid;
           grid-row-gap: 50px;
           min-width: 100vw;

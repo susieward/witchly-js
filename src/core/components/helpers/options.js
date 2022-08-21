@@ -2,7 +2,8 @@ const { observe } = require('./proxy')
 const { initStyles } = require('./styles')
 const staticProps = ['name', 'components', 'constructor']
 
-function initOptions(options, vm, callback) {
+function initOptions(vm, callback, doc) {
+  const options = vm._options
   const descriptors = _buildDescriptorsObject(options)
   const watchedProps = options.watch ? Object.keys(options.watch) : []
 
@@ -30,7 +31,7 @@ function initOptions(options, vm, callback) {
   if (watchedProps.length > 0) {
     _defineWatchers(watchedProps, descriptors, vm)
   }
-  initStyles(vm, window.document)
+  initStyles(vm, doc)
   return vm
 }
 
@@ -55,7 +56,7 @@ function _defineTemplate(desc, vm) {
   }
   Object.defineProperty(vm, 'template', {
     get() {
-      return getter ? getter.call(vm) : val.call(vm, vm)
+      return getter?.call(vm) || val.call(vm, vm)
     },
     enumerable: true,
     configureable: true
