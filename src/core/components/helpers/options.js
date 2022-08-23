@@ -11,7 +11,7 @@ function initOptions(vm, callback, doc) {
     const desc = descriptors[key]
     if (key === 'state' || watchedProps.includes(key)) {
       continue
-    } else if (key === 'template') {
+    } else if (['template', 'render'].includes(key)) {
       _defineTemplate(desc, vm)
     } else if (staticProps.includes(key)) {
       _defineStaticProp(key, desc, vm)
@@ -52,7 +52,7 @@ function _defineTemplate(desc, vm) {
   } else if (desc.hasOwnProperty('get')) {
     getter = desc.get
   } else {
-    throw new Error('Template must be a getter or a function')
+    throw new Error('Template/render must be a getter or a function')
   }
   Object.defineProperty(vm, 'template', {
     get() {

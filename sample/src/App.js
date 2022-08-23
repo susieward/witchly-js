@@ -14,7 +14,7 @@ const App = () => {
   return {
     name,
     components,
-    get template() {
+    render() {
       return (
         <div id="app">
           <app-header></app-header>

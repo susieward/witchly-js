@@ -16,7 +16,7 @@ export default class CodeEditor {
     this.outputHTML = this.$querySelector('textarea').value
   }
 
-  get template() {
+  render() {
     return (
       <div>
         <textarea

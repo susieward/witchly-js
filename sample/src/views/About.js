@@ -2,7 +2,7 @@
 export default function About() {
   this.name = 'about-view'
   this.title = 'About'
-  this.template = function() {
+  this.render = function() {
     return (
       <app-content title-text={this.title}>
         <p>

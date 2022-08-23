@@ -9,7 +9,7 @@ export default {
   disconnectedCallback() {
     this.$root.removeEventListener('hi', this.hi)
   },
-  get template() {
+  render() {
     return (
       <app-content title-text="Home">
         <code-editor></code-editor>

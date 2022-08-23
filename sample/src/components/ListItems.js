@@ -22,7 +22,7 @@ export default class ListItems {
     this.message = 'bye!'
   }
 
-  get template() {
+  render() {
     return (
       <ul>{this.currentItems}</ul>
     )

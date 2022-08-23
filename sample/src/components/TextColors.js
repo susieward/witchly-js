@@ -7,7 +7,7 @@ export default class TextColors {
   })
   styles = '.color { display: inline-block; margin-right: 10px;}'
 
-  get template() {
+  render() {
     const style = `color: ${this.color}`
     return (
       <div>

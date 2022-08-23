@@ -13,12 +13,12 @@ class BaseComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    this.#render().catch(err => console.error(err))
+    this.#_render().catch(err => console.error(err))
   }
 
-  async #render() {
+  async #_render() {
     this.attachShadow({ mode: 'open' })
-    initOptions(this, this.#update, window.document)
+    initOptions(this, this.#_update, window.document)
     if (this._options.createdCallback) {
       this._options.createdCallback.call(this)
     }
@@ -39,13 +39,13 @@ class BaseComponent extends HTMLElement {
     if (!this.isConnected) return
     newVal = _parseValue(newVal)
     oldVal = _parseValue(oldVal)
-    await this.#update(name, newVal, oldVal)
+    await this.#_update(name, newVal, oldVal)
     if (this._options.attributeChangedCallback) {
       this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
     }
   }
 
-  async #update(prop, newVal, oldVal) {
+  async #_update(prop, newVal, oldVal) {
     if (!this.shadowRoot?.firstChild) return
     await update(prop, newVal, oldVal, this).catch(err => console.error(err))
     if (this.watch && this.watch[prop]) {

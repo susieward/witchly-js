@@ -1,6 +1,6 @@
 export default {
   name: 'app-content',
-  get template() {
+  render() {
     return (
       <div class="content">
         <h2>{this['title-text']}</h2>

@@ -51,7 +51,7 @@ export default class Examples {
     this.addListItem('hello!')
   }
 
-  get template() {
+  render() {
     return (
       <app-content title-text={this.title}>
         <span>{this.message}</span>

@@ -19,7 +19,7 @@ export default class Header {
     this.inputEl.placeholder = 'Type something'
   }
 
-  get template() {
+  render() {
     return (
       <header id="header">
         <Title
