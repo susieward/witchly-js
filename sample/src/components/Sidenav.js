@@ -2,7 +2,7 @@
 const Sidenav = (props, children) => {
   const navLinks = props.links.map(link => {
     return (
-      <span class="link" onclick={() => props.onclick(link.path)}>
+      <span class="link" onclick={() => props.onclick(link)}>
         {link.name}
       </span>
     )
@@ -13,6 +13,15 @@ const Sidenav = (props, children) => {
       color: var(--accent-color);
       cursor: pointer;
       margin-right: auto;
+    }
+    .sidenav {
+      display: grid;
+      align-content: flex-start;
+      background-color: var(--content-bg-color);
+      border: var(--content-border);
+      border-radius: 5px;
+      padding: 12px 20px;
+      height: auto;
     }
     .sidenav h2 {
       display: inline-block;
@@ -25,7 +34,7 @@ const Sidenav = (props, children) => {
 
   return (
     <div>
-      <aside class={props.class}>
+      <aside class="sidenav">
         {navLinks}
         {children}
       </aside>

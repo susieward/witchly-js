@@ -3,47 +3,66 @@ export default class TextColors {
   name = 'text-colors'
   state = () => ({
     color: '',
-    colors: ['pink', 'slateblue', 'skyblue', 'turquoise', 'aqua']
+    colors: ['pink', 'slateblue', 'skyblue', 'turquoise', 'hotpink']
   })
-  styles = '.color { display: inline-block; margin-right: 10px;}'
+
+  createdCallback() {
+    this.color = this.getRandomColor()
+  }
 
   render() {
-    const style = `color: ${this.color}`
     return (
-      <div>
-        <span style={style}>
+      <div style="display: grid; justify-content: flex-start;">
+        <span class="color">
           I'm some text!
         </span>
         <div>
-          <p>Text colors: {this.colorsList}</p>
-          <p>
-            Current color:
-            <span style={style}>{this.color}</span>
-          </p>
+        Text colors (click to change):
+          <ul>
+            {this.colors.map(color => {
+              return (
+                <li>
+                  <button
+                    style={`color: ${color}; border: 1px solid ${color}`}
+                    onclick={() => this.color = color}>
+                    {color}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          <p>Current color: <span class="color">{this.color}</span></p>
           <input id="new-color" type="text" value="" />
-          <button onclick={() => this.addColor()}>add color</button>
+          <button onclick={() => this.addColor()}>
+            add color
+          </button>
           <p>
             <button onclick={() => this.randomColor()}>
               random text color
             </button>
           </p>
         </div>
+        <style>{this.localStyles}</style>
       </div>
     )
   }
 
-  get colorsList() {
-    return this.colors.map(color => {
-      const style = `color: ${color}`
-      return (
-        <span
-          class="color"
-          onclick={() => this.setColor(color)}
-          style={style}>
-          {color}
-        </span>
-      )
-    })
+  get localStyles() {
+    return (
+      `li {
+        width: auto;
+      }
+
+      .color-text {
+        display: inline-block;
+        margin-right: 10px;
+      }
+      .color {
+        display: inline-block;
+        margin-right: 10px;
+        color: ${this.color};
+      }`
+    )
   }
 
   get input() {
@@ -56,10 +75,6 @@ export default class TextColors {
       nextColor = this.getRandomColor()
     }
     return nextColor
-  }
-
-  setColor(color) {
-    this.color = color
   }
 
   randomColor() {

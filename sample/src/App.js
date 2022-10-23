@@ -8,7 +8,8 @@ const App = () => {
   const links = [
     { name: 'Home', path: '/' },
     { name: 'Examples', path: '/examples' },
-    { name: 'About', path: '/about' }
+    { name: 'About', path: '/about' },
+    { name: 'Test', params: { id: 'blah' } }
   ]
 
   return {
@@ -17,10 +18,9 @@ const App = () => {
     render() {
       return (
         <div id="app">
-          <app-header></app-header>
+          <app-header propTest="hi"></app-header>
           <main class="main">
             <Sidenav
-              class="sidenav"
               onclick={(path) => this.$go(path)}
               links={links}>
             </Sidenav>
@@ -41,28 +41,13 @@ const App = () => {
 
         .main {
           display: grid;
-          justify-content: center;
-          align-content: flex-start;
-          grid-template-areas: 'sidenav content';
-          grid-auto-rows: auto;
-          grid-column-gap: 45px;
+          grid-template-columns: minmax(100px, 20%) 1fr;
           grid-row-gap: 20px;
+          grid-column-gap: 2rem;
           width: 100%;
           max-width: 1250px;
           min-height: auto;
           margin: 0 auto;
-        }
-
-        .sidenav {
-          grid-area: sidenav;
-          display: grid;
-          align-content: flex-start;
-          width: 260px;
-          background-color: var(--content-bg-color);
-          border: var(--content-border);
-          border-radius: 5px;
-          padding: 12px 20px;
-          height: auto;
         }`
       )
     }

@@ -8,56 +8,126 @@ async function update(prop, newVal, oldVal, vm) {
   const newDom = await vm._parse()
   const oldDom = vm.shadowRoot.firstChild
 
-  if (typeof newVal !== 'string') newVal = null
-  compareNodes(newDom, oldDom, newVal)
-}
+  console.log(newDom, oldDom)
 
-function compareNodes(newDom, oldDom, newVal) {
+  if ((typeof newVal !== 'string') || (typeof oldVal !== 'string')) {
+    newVal = null
+  }
+
   const exp = _buildXPathExpression(newVal)
-  const matches = _getChangedNodes(exp, newDom, oldDom)
 
-  if (matches.length > 0) {
-    _processMatches(matches, newVal)
+  console.log(exp)
+  const matches = getChangedNodeMatches(exp, newDom, oldDom)
+
+  console.log(matches, exp)
+
+  if (newVal !== null && matches.length > 0) {
+    _processMatches(matches, newVal, newDom, oldDom)
   } else {
-    if (!newDom.isEqualNode(oldDom)) {
-      oldDom.replaceWith(newDom)
-    }
+    compareNodes(newDom, oldDom, newVal)
   }
 }
 
-function _processMatches(matches, newVal) {
+function _processMatches(matches, newVal, newDom, oldDom) {
   matches = matches.reverse()
 
   for (const [index, match] of matches.entries()) {
     const { newEl, oldEl } = match
-
     if (index > 0) {
       const prev = matches[index - 1]
-      if (oldEl.contains(prev.newEl)) continue
-    }
-
-    if (newEl.hasAttributes() || oldEl.hasAttributes()) {
-      _processAttrs(newEl, oldEl)
-    }
-
-    if (newVal !== null) {
-      _processInnerText(newEl, oldEl, newVal)
-    } else {
-      if (newEl.childNodes.length !== oldEl.childNodes.length) {
-        oldEl.replaceChildren(...newEl.childNodes)
+      if (oldEl.contains(prev.newEl)) {
         break
       }
-      compareNodes(newEl, oldEl, newVal)
+    }
+    compareNodes(newEl, oldEl, newVal)
+  }
+}
+
+function compareNodes(newEl, oldEl, newVal) {
+  console.log('newEl, oldEl, isEqualNode: ', newEl, oldEl, newEl.isEqualNode(oldEl))
+  if (!newEl.isEqualNode(oldEl)) {
+
+    const newNodeType = newEl.nodeType
+    const oldNodeType = oldEl.nodeType
+
+    if (newNodeType === 1 && oldNodeType === 1) {
+      if (newEl.hasAttributes() || oldEl.hasAttributes()) {
+        processAttrs(newEl, oldEl)
+      }
+    }
+
+    if (newEl.hasChildNodes() || oldEl.hasChildNodes()) {
+      const newChildren = [...newEl.childNodes]
+      const oldChildren = [...oldEl.childNodes]
+
+      console.log('newChildren', newChildren)
+      console.log('oldChildren', oldChildren)
+
+      if (newChildren.length !== oldChildren.length) {
+        if (
+          ((newChildren.length === 0) && (oldChildren.length > 0))
+          || ((newChildren.length > 0) && (oldChildren.length === 0))
+        ) {
+          //console.log('replacing', newEl, oldEl)
+          return oldEl.replaceWith(newEl)
+        }
+      }
+      _iterChildren(newEl, oldEl, newVal, newChildren, oldChildren)
     }
   }
 }
 
-function _processAttrs(newEl, oldEl) {
+function _iterChildren(newEl, oldEl, newVal, newChildren, oldChildren) {
+  let index = 0
+
+  while (true) {
+    let newChild = newChildren[index]
+    let oldChild = oldChildren[index]
+
+    if (!newChild && !oldChild) break
+    index += 1
+
+    if (newChild && oldChild) {
+      const newNodeType = newChild.nodeType
+      const oldNodeType = oldChild.nodeType
+      if (newNodeType !== oldNodeType) {
+        appendOrInsert(newChild, oldEl)
+      } else if ((newNodeType === 3) && (oldNodeType === 3)) {
+        if (newChild.nodeValue !== oldChild.nodeValue) {
+          oldChild.nodeValue = newChild.nodeValue
+          continue
+        }
+      } else {
+        compareNodes(newChild, oldChild, newVal)
+      }
+    } else if (newChild && !oldChild) {
+      console.log('newChild && !oldChild', newChild)
+      appendOrInsert(newChild, oldEl)
+    } else if (!newChild && oldChild) {
+      console.log('!newChild && oldChild', oldChild)
+      oldEl.removeChild(oldChild)
+    }
+  }
+}
+
+function appendOrInsert(newChild, parent) {
+  const next = newChild.nextSibling
+  console.log('newChild, parent, next sibling:', newChild, parent, next)
+  if (next?.nodeType === 1) {
+    const match = parent.querySelector(`${next.localName}[data-id=${next.dataset.id}]`)
+    if (match) {
+      return parent.insertBefore(newChild, match)
+    }
+  }
+  parent.append(newChild)
+}
+
+function processAttrs(newEl, oldEl) {
   const attrs = newEl.getAttributeNames()
   for (const attr of attrs) {
     const newAttrVal = newEl.getAttribute(attr)
     const oldAttrVal = oldEl.getAttribute(attr)
-    if (newAttrVal !== oldAttrVal) {
+    if (newAttrVal !== oldAttrVal && attr !== 'data-id') {
       if (attr === 'data-if') {
         oldEl.replaceWith(newEl)
       } else {
@@ -67,47 +137,102 @@ function _processAttrs(newEl, oldEl) {
   }
 }
 
-function _processInnerText(newEl, oldEl, newVal) {
-  const newText = newEl.innerText.trim().replaceAll('\n', '')
-  const oldText = oldEl.innerText.trim().replaceAll('\n', '')
-  const textDiff = newText !== oldText
-
-  if (textDiff && newEl.innerText.includes(newVal)) {
-    oldEl.innerText = newEl.innerText
-  }
-}
-
-function _getChangedNodes(exp, newDom, oldDom) {
-  const matches = []
+function getChangedNodeMatches(exp, newDom, oldDom) {
   const newDomResults = _getXPathResults(exp, newDom)
+  const matches = []
+  let node = null
 
-  let el = newDomResults.iterateNext()
-
-  while (el) {
-    const matchExp = `.//*[name()="${el.localName}" and @data-id="${el.getAttribute('data-id')}"]`
-    const oldDomResults = _getXPathResults(matchExp, oldDom)
-    const match = oldDomResults.iterateNext()
-    if (match && !match.isEqualNode(el)) {
-      matches.push({ newEl: el, oldEl: match })
+  while (node = newDomResults.iterateNext()) {
+    let match = getNodeMatch(node, oldDom)
+    if (match && !match.isEqualNode(node)) {
+      matches.push({ newEl: node, oldEl: match })
     }
-    el = newDomResults.iterateNext()
   }
   return matches
+}
+
+function getNodeMatch(node, targetDom) {
+  let match = null
+  if (node?.nodeType === 1) {
+    match = targetDom.querySelector(`${node.localName}[data-id=${node.dataset.id}]`)
+  } else if (node?.nodeType === 3) {
+    const value = node.nodeValue
+    const next = node.nextSibling
+    const prev = node.previousSibling
+    console.log(node, next, prev)
+    // console.log(node, value, next, prev)
+
+    // let xpath = `.//text()[contains(.,"${value}")]`
+    let xpath = `.//text()`
+
+    if (next) {
+      if (next.nodeType === 1) {
+        xpath += `[following-sibling::*[1][@data-id="${next.dataset.id}"]]`
+      } else if (next.nodeType === 3) {
+        xpath += `[following-sibling::text()="${next.nodeValue}"]`
+      }
+    }
+
+    if (prev) {
+      if (prev.nodeType === 1) {
+        xpath += ` | .//text()[preceding-sibling::*[1][@data-id="${prev.dataset.id}"]]`
+      } else if (prev.nodeType === 3) {
+        xpath += ` | .//text()[preceding-sibling::text()="${prev.nodeValue}"]`
+      }
+    }
+
+    console.log('xpath', xpath)
+    const results = _getXPathResults(xpath, targetDom)
+    let nodes = []
+    let currNode = null
+
+    while (currNode = results.iterateNext()) {
+      console.log('currNode', currNode)
+      if (currNode.nodeType === 3) {
+        if (next?.nodeType === 3 && (currNode.nodeValue === next.nodeValue)) {
+          continue
+        }
+        if (prev?.nodeType === 3 && (currNode.nodeValue === prev.nodeValue)) {
+          continue
+        }
+      }
+      nodes.push(currNode)
+    }
+    console.log('nodes', nodes)
+
+    //document.evaluate(xpath, targetDom, null, XPathResult.ANY_UNORDERED_NODE_TYPE, null)
+
+    // console.log(result)
+    // match = result.singleNodeValue
+    // console.log('match', match)
+  }
+  return match
 }
 
 function _buildXPathExpression(newVal) {
   if (newVal == null) return `.//*`
 
+  if (newVal.includes(`"`)) {
+    newVal = newVal.slice().replaceAll(`"`, `'`)
+  }
+
   const excludedAttrs = ['data-id', 'data-if']
   const excludedAttrNames = excludedAttrs.map(attr => `name()="${attr}"`).join(' or ')
-  // retrieve any elements with text that includes the new value
-  const innerTextExp = `.//*[contains(text(),"${newVal}")]`
+
   // retrieve any elements with non-excluded attribute values that contain the new value
   const attrValExp = `.//*[@*[contains(., "${newVal}") and not(${excludedAttrNames})]]`
+
+  // retrieve any elements with text that includes the new value
+  const innerTextExp = [
+    `./*[text()[contains(.,"${newVal}")]]`,
+    `.//*[text()[contains(.,"${newVal}")]]`,
+    `.//text()[contains(.,"${newVal}")]`
+  ]
   // retrieve any elements with conditional data attributes to check for changes
   const conditionalExp = `.//*[@data-if]`
+
   // join results
-  return `${innerTextExp} | ${attrValExp} | ${conditionalExp}`
+  return [...innerTextExp, attrValExp, conditionalExp].join(' | ')
 }
 
 function _getXPathResults(exp, referenceNode, args = null) {

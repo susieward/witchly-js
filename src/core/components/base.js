@@ -4,8 +4,14 @@ const { initOptions } = require('./helpers/options')
 const staticAttrs = ['data-id', 'data-root']
 
 class BaseComponent extends HTMLElement {
+  $props
+
   get $router() {
     return this._root?.router || this.$root.$router
+  }
+
+  get $route() {
+    return this.$router?.view?._route
   }
 
   get $root() {
@@ -13,6 +19,7 @@ class BaseComponent extends HTMLElement {
   }
 
   connectedCallback() {
+    // this.#initProps()
     this.#_render().catch(err => console.error(err))
   }
 
@@ -27,6 +34,22 @@ class BaseComponent extends HTMLElement {
     if (this._options.connectedCallback) {
       this._options.connectedCallback.call(this)
     }
+  }
+
+  #initProps() {
+    const props = this._props || {}
+    this.$props = new Proxy(props, {
+        get(target, prop, receiver) {
+          const value = target[prop]
+          console.log(`getting ${prop}:`, value)
+          return value
+        },
+        set(target, prop, value) {
+          console.log(`setting ${prop} to val:`, value)
+          target[prop] = value
+          return true
+        }
+      })
   }
 
   disconnectedCallback() {

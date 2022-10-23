@@ -70,9 +70,6 @@ class Observer {
   }
 
   getParentEl() {
-    if (this._parent.constructor.name !== 'Observer') {
-      return this._parent
-    }
     let el = null
     let parent = this._parent
 

@@ -1,16 +1,16 @@
 const TextColors = () => import('@/components/TextColors')
 const ListItems = () => import('@/components/ListItems')
+const CodeEditor = () => import('@/components/CodeEditor')
 
 export default class Examples {
   name = 'examples-view'
-  components = { TextColors, ListItems }
+  components = { TextColors, ListItems, CodeEditor }
   title = 'Examples'
   state = () => ({
     items: [],
     message: '',
     exampleComps: [
       {
-        id: 1,
         title: 'Text Colors (1)',
         show: false,
         get template() {
@@ -18,15 +18,13 @@ export default class Examples {
         }
       },
       {
-        id: 2,
-        title: 'Text Colors (2)',
+        title: 'CodeEditor',
         show: false,
         get template() {
-          return <text-colors></text-colors>
+          return <code-editor></code-editor>
         }
       },
       {
-        id: 3,
         title: 'List Items',
         show: false,
         get template() {
@@ -43,6 +41,13 @@ export default class Examples {
             </div>
           )
         }
+      },
+      {
+        title: 'Text Colors (2)',
+        show: false,
+        get template() {
+          return <text-colors></text-colors>
+        }
       }
     ]
   })
@@ -54,7 +59,10 @@ export default class Examples {
   render() {
     return (
       <app-content title-text={this.title}>
-        <span>{this.message}</span>
+        <span data-if={Boolean(this.message)}>
+          {this.message}
+        </span>
+        <p>{this.$route.params.message}</p>
         <div id="examples">
           {this.comps}
         </div>
@@ -72,7 +80,9 @@ export default class Examples {
             {comp.title}
           </span>
           <div class="comp">
-            {comp.show === true ? comp.template : ''}
+          {(comp.show === true)
+            ? comp.template
+            : null}
           </div>
         </div>
       )
@@ -88,6 +98,7 @@ export default class Examples {
   }
 
   removeItem(index) {
+    console.log(index)
     this.items.splice(index, 1)
   }
 

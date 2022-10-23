@@ -4,12 +4,16 @@ const staticProps = ['name', 'components', 'constructor']
 
 function initOptions(vm, callback, doc) {
   const options = vm._options
+  const route = vm.$route
+  // console.log('route from initOptions', route)
   const descriptors = _buildDescriptorsObject(options)
   const watchedProps = options.watch ? Object.keys(options.watch) : []
 
   for (const key of Object.keys(descriptors)) {
     const desc = descriptors[key]
-    if (key === 'state' || watchedProps.includes(key)) {
+    if (key === 'props') {
+      _defineComponentProps(desc, vm)
+    } else if (key === 'state' || watchedProps.includes(key)) {
       continue
     } else if (['template', 'render'].includes(key)) {
       _defineTemplate(desc, vm)
@@ -33,6 +37,26 @@ function initOptions(vm, callback, doc) {
   }
   initStyles(vm, doc)
   return vm
+}
+
+function _defineComponentProps(desc, vm) {
+  let props = {}
+  let keys = []
+  if (Array.isArray(desc.value)) {
+    keys = desc.value
+  } else if (desc.value && typeof desc.value === 'object') {
+    keys = Object.keys(desc.value)
+  } else {
+    throw new Error('Props must be an array or an object')
+  }
+  if (keys.length > 0) {
+    // console.log(keys)
+    /*
+    for (const key of keys) {
+      props[key] =
+    }
+    */
+  }
 }
 
 function _buildDescriptorsObject(options) {
@@ -104,6 +128,7 @@ function _defineWatchers(watchedProps, descriptors, vm) {
 
 function _defineAttrs(vm, options) {
   const attrs = vm.getAttributeNames()
+  // console.log(attrs, vm._props)
   const observedAttrs = options.observedAttributes
     || vm.constructor?.observedAttributes
     || []

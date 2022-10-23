@@ -7,6 +7,11 @@ export default class ListItems {
       handler(newVal) {
         this.$emit('message', newVal)
       }
+    },
+    items: {
+      handler(newVal, oldVal) {
+        console.log(newVal, oldVal)
+      }
     }
   }
 
@@ -35,7 +40,7 @@ export default class ListItems {
         <li
           data-index={i}
           onclick={() => this.$emit('remove', i)}>
-          {item}
+          {item} {i}
         </li>
       )
     })

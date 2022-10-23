@@ -1,22 +1,32 @@
 const {
   Router,
   createComponent,
+  registerComponents,
   createElementJSX,
   createFragmentJSX
 } = require('./core')
 
 class Witchly {
   #el
+  #router
+  static #components = {}
+
+  static get components() {
+    return this.#components
+  }
 
   constructor(options) {
-    this.#init(options)
+    this.#init(options).catch(err => console.error(err))
   }
 
   async #init(options) {
     if (options.router) {
-      this.router = new Router(options.router, this)
+      this.#router = new Router(options.router, this)
     }
-    const comp = await Witchly.component(options.render(), this)
+    if (Object.values(this.constructor.components).length > 0) {
+      await registerComponents(this.constructor.components, this)
+    }
+    const comp = await createComponent(options.render(), this)
     const el = document.getElementById(options.id)
     const newEl = new comp._ctor()
     newEl.dataset.root = true
@@ -28,8 +38,12 @@ class Witchly {
     return this.#el
   }
 
-  static component(options, root) {
-    return createComponent(options, root)
+  get router() {
+    return this.#router
+  }
+
+  static component(comp) {
+    this.#components[comp.name] = comp
   }
 }
 

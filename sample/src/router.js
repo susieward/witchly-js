@@ -6,18 +6,24 @@ export default {
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'Home',
       component: Home
     },
     {
       path: '/examples',
-      name: 'examples',
+      name: 'Examples',
       component: Examples
     },
     {
       path: '/about',
-      name: 'about',
+      name: 'About',
       component: About
+    },
+    {
+      path: '/test/:id',
+      name: 'Test',
+      component: Home,
+      props: true
     }
   ]
 }

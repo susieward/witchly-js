@@ -2,9 +2,11 @@ const RouterView = require('./view')
 
 class Router {
   #root
+  #routes = []
 
   constructor({ routes }, root) {
     this.#root = root
+    this.#routes = routes
     customElements.define('router-view',
       class extends RouterView {
         get routes() {
@@ -18,16 +20,20 @@ class Router {
     )
   }
 
-  get #el() {
+  get el() {
     return this.#root._el
   }
 
-  get #view() {
-    return this.#el.shadowRoot.querySelector('router-view')
+  get view() {
+    return this.el?.shadowRoot?.querySelector('router-view')
+  }
+
+  get routes() {
+    return this.#routes
   }
 
   push(data) {
-    return this.#view.push(data).catch(err => console.error(err))
+    return this.view.push(data).catch(err => console.error(err))
   }
 }
 

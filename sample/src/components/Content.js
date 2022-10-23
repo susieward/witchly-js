@@ -11,11 +11,9 @@ export default {
   get styles() {
     return (
       `.content {
-        grid-area: content;
         display: grid;
-        max-width: 1fr;
-        width: 900px;
-        min-width: auto;
+        width: 100%;
+        max-width: 900px;
         background-color: var(--content-bg-color);
         box-shadow: 0 6px 8px rgb(85 102 119 / 3%), 0 1px 1px rgb(85 102 119 / 40%);
         background-color: #fff;

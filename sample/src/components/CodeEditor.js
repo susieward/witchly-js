@@ -2,18 +2,21 @@
 export default class CodeEditor {
   name = 'code-editor'
   defaultContent = '<p>Edit me!</p>'
-  outputHTML = ''
+  state = () => ({ outputHTML: '' })
 
   watch = {
     outputHTML: {
       handler(newVal) {
-        this.$querySelector('#output').innerHTML = newVal
+        this.output.innerHTML = newVal
+        if (newVal === this.defaultContent && this.textarea.value !== newVal) {
+          this.textarea.value = newVal
+        }
       }
     }
   }
 
   connectedCallback() {
-    this.outputHTML = this.$querySelector('textarea').value
+    this.outputHTML = this.defaultContent
   }
 
   render() {
@@ -22,17 +25,24 @@ export default class CodeEditor {
         <textarea
           rows="10"
           oninput={(e) => this.outputHTML = e.target.value}>
-          {this.defaultContent}
         </textarea>
-        <button onclick={() => this.reset()}>reset</button>
         <div id="output"></div>
+        <button onclick={() => this.reset()}>reset</button>
+        {Boolean(this.outputHTML) ? <p>hi</p> : null}
       </div>
     )
   }
 
   reset() {
-    this.$querySelector('textarea').value = this.defaultContent
     this.outputHTML = this.defaultContent
+  }
+
+  get textarea() {
+    return this.$querySelector('textarea')
+  }
+
+  get output() {
+    return this.$querySelector('#output')
   }
 
   get styles() {

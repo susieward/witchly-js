@@ -27,6 +27,8 @@ export default class Header {
           text={this.textVal || this.defaultTitle}>
         </Title>
         <div class="header-right">
+        {this.textVal}
+        <button onclick={() => this.$router.push({ name: 'Home'})}>home</button>
           <input id="input" type="text" oninput={(e) => this.textVal = e.target.value} />
           <button
             data-if={this.clearable}
