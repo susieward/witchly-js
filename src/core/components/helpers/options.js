@@ -21,6 +21,7 @@ function initOptions(vm, callback, doc) {
       Object.defineProperty(vm, key, desc)
     }
   }
+
   if (vm.hasAttributes()) {
     _defineAttrs(vm, options)
   }
@@ -32,26 +33,6 @@ function initOptions(vm, callback, doc) {
   }
   initStyles(vm, doc)
   return vm
-}
-
-function _defineComponentProps(desc, vm) {
-  let props = {}
-  let keys = []
-  if (Array.isArray(desc.value)) {
-    keys = desc.value
-  } else if (desc.value && typeof desc.value === 'object') {
-    keys = Object.keys(desc.value)
-  } else {
-    throw new Error('Props must be an array or an object')
-  }
-  if (keys.length > 0) {
-    // console.log(keys)
-    /*
-    for (const key of keys) {
-      props[key] =
-    }
-    */
-  }
 }
 
 function _buildDescriptorsObject(options) {

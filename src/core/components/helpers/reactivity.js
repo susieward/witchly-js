@@ -27,7 +27,6 @@ function processMatches(matches, newVal, newDom, oldDom) {
     if (index > 0) {
       const prev = matches[index - 1]
       if (prev.newEl.contains(newEl) || prev.oldEl?.contains(newEl)) {
-        //console.log('continuing', match, prev)
         continue
       }
     }

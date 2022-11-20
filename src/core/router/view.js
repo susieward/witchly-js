@@ -70,21 +70,6 @@ class RouterView extends HTMLElement {
     this.#route = routeRecord
     this.history.pushState(routeRecord, null, routeRecord.fullPath)
     this.#render().catch(err => console.error(err))
-    /*
-    if (routeRecord.name === routeRecord.prev?.name) {
-      const keys = Object.keys(this.#route.params)
-      if (keys?.length > 0) {
-        for (const key of keys) {
-          this.#instance.$props[key] = this.#route.params[key]
-        }
-      }
-      //this.#instance.$props = { ...this.#route.params }
-      // console.log('this.#route.params', this.#route.params)
-      return
-    } else {
-      await this.#render()
-    }
-    */
   }
 
   #buildRouteRecord(data, prev = true) {
