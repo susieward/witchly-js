@@ -18,19 +18,7 @@ export default class TextColors {
         </span>
         <div>
         Text colors (click to change):
-          <ul>
-            {this.colors.map(color => {
-              return (
-                <li>
-                  <button
-                    style={`color: ${color}; border: 1px solid ${color}`}
-                    onclick={() => this.color = color}>
-                    {color}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
+          <ul>{this.colorsList}</ul>
           <p>Current color: <span class="color">{this.color}</span></p>
           <input id="new-color" type="text" value="" />
           <button onclick={() => this.addColor()}>
@@ -45,6 +33,20 @@ export default class TextColors {
         <style>{this.localStyles}</style>
       </div>
     )
+  }
+
+  get colorsList() {
+    return this.colors.map(color => {
+      return (
+        <li>
+          <button
+            style={`color: ${color}; border: 1px solid ${color}`}
+            onclick={() => this.color = color}>
+            {color}
+          </button>
+        </li>
+      )
+    })
   }
 
   get localStyles() {

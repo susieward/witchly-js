@@ -7,7 +7,7 @@ const App = () => {
 
   const links = [
     { name: 'Home', path: '/' },
-    { name: 'Examples', path: '/examples' },
+    { name: 'Examples', path: '/examples', params: { show: 3 }},
     { name: 'About', path: '/about' },
     { name: 'Test', params: { id: 'blah' } }
   ]

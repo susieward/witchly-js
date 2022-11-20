@@ -1,4 +1,4 @@
-import Witchly from 'witchly'
+import Witchly from '../../src'
 const App = () => import('./App')
 const Content = () => import('./components/Content')
 import { Section, Subheader } from './components/Section'

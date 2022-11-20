@@ -4,16 +4,12 @@ const staticProps = ['name', 'components', 'constructor']
 
 function initOptions(vm, callback, doc) {
   const options = vm._options
-  const route = vm.$route
-  // console.log('route from initOptions', route)
   const descriptors = _buildDescriptorsObject(options)
   const watchedProps = options.watch ? Object.keys(options.watch) : []
 
   for (const key of Object.keys(descriptors)) {
     const desc = descriptors[key]
-    if (key === 'props') {
-      _defineComponentProps(desc, vm)
-    } else if (key === 'state' || watchedProps.includes(key)) {
+    if (key === 'state' || watchedProps.includes(key)) {
       continue
     } else if (['template', 'render'].includes(key)) {
       _defineTemplate(desc, vm)
@@ -25,7 +21,6 @@ function initOptions(vm, callback, doc) {
       Object.defineProperty(vm, key, desc)
     }
   }
-
   if (vm.hasAttributes()) {
     _defineAttrs(vm, options)
   }
@@ -128,7 +123,6 @@ function _defineWatchers(watchedProps, descriptors, vm) {
 
 function _defineAttrs(vm, options) {
   const attrs = vm.getAttributeNames()
-  // console.log(attrs, vm._props)
   const observedAttrs = options.observedAttributes
     || vm.constructor?.observedAttributes
     || []

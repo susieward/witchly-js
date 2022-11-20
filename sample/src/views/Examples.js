@@ -9,7 +9,7 @@ export default class Examples {
   state = () => ({
     items: [],
     message: '',
-    exampleComps: [
+    examples: [
       {
         title: 'Text Colors (1)',
         show: false,
@@ -54,15 +54,19 @@ export default class Examples {
 
   createdCallback() {
     this.addListItem('hello!')
+    if (this.$route.params?.show != null) {
+      const comp = this.examples[Number(this.$route.params.show)]
+      comp.show = true
+    }
   }
 
   render() {
     return (
       <app-content title-text={this.title}>
+      {this.$route.params.message}
         <span data-if={Boolean(this.message)}>
           {this.message}
         </span>
-        <p>{this.$route.params.message}</p>
         <div id="examples">
           {this.comps}
         </div>
@@ -71,7 +75,7 @@ export default class Examples {
   }
 
   get comps() {
-    return this.exampleComps.map(comp => {
+    return this.examples.map(comp => {
       return (
         <div class="example">
           <span
@@ -79,11 +83,9 @@ export default class Examples {
             onclick={() => this.toggleComp(comp)}>
             {comp.title}
           </span>
-          <div class="comp">
           {(comp.show === true)
-            ? comp.template
-            : null}
-          </div>
+            ? <div class="comp">{comp.template}</div>
+            : ''}
         </div>
       )
     })
@@ -94,7 +96,9 @@ export default class Examples {
   }
 
   addListItem(text) {
-    this.items.push(text)
+    let uuid = self.crypto.randomUUID()
+    const index = uuid
+    this.items.push(`${text} ${index}`)
   }
 
   removeItem(index) {

@@ -3,14 +3,13 @@ const { createComponent } = require('../components')
 class RouterView extends HTMLElement {
   #components = {}
   #route = null
-  #instance = null
 
   constructor() {
     super()
     window.onpopstate = async () => {
       const routeRecord = this.#buildRouteRecord(this.location.pathname)
       this.#route = routeRecord
-      await this.#render()
+      this.#render()
     }
     this.attachShadow({ mode: 'open' })
     this.#route = this.#buildRouteRecord(this.location.pathname, false)
@@ -49,9 +48,10 @@ class RouterView extends HTMLElement {
   }
 
   async #render() {
+    const currentRoute = this.currentRoute
     if (!this._currentComponent) {
-      const comp = await createComponent(this.currentRoute.component, this._root)
-      this.#components[this.currentRoute.component.name] = comp
+      const comp = await createComponent(currentRoute.component, this._root)
+      this.#components[currentRoute.component.name] = comp
     }
 
     const el = new this._currentComponent._ctor()
@@ -63,14 +63,13 @@ class RouterView extends HTMLElement {
     } else {
       this.shadowRoot.firstChild.replaceWith(el)
     }
-    this.#instance = el
   }
 
   async push(data) {
     const routeRecord = this.#buildRouteRecord(data)
     this.#route = routeRecord
     this.history.pushState(routeRecord, null, routeRecord.fullPath)
-    await this.#render().catch(err => console.error(err))
+    this.#render().catch(err => console.error(err))
     /*
     if (routeRecord.name === routeRecord.prev?.name) {
       const keys = Object.keys(this.#route.params)

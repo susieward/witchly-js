@@ -28,7 +28,7 @@ export default class CodeEditor {
         </textarea>
         <div id="output"></div>
         <button onclick={() => this.reset()}>reset</button>
-        {Boolean(this.outputHTML) ? <p>hi</p> : null}
+        <p data-if={Boolean(this.outputHTML)}>hi</p>
       </div>
     )
   }

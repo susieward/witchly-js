@@ -3,9 +3,7 @@ const CodeEditor = () => import('@/components/CodeEditor')
 export default class Home {
   name = 'home-view'
   components = { CodeEditor }
-  state = () => ({
-    paramsMessage: ''
-  })
+  state = () => ({ paramsMessage: '' })
   // props = ['id']
 
   get id() {
@@ -14,7 +12,7 @@ export default class Home {
 
   connectedCallback() {
     this.$root.addEventListener('hi', this.hi)
-    this.$querySelector('#params-btn').append('blah')
+    // this.paramsMessage = 'blah'
   }
 
   disconnectedCallback() {
@@ -24,7 +22,7 @@ export default class Home {
   render() {
     return (
       <app-content title-text="Home">
-      Id: {this.id}. params message: {this.paramsMessage}
+      Id: {this.id}. {this.paramsMessage} params message
       <p>
         <button onclick={() => this.$go('/test/3')}>
           test: 3
@@ -41,6 +39,7 @@ export default class Home {
         </p>
         <code-editor></code-editor>
         <button id="button" onclick={() => this.$emit('hi', 'hi')}>hi</button>
+        {this.paramsMessage}
       </app-content>
     )
   }
@@ -53,6 +52,6 @@ export default class Home {
   }
 
   hi(e) {
-    return this.$root.shadowRoot.firstElementChild.append(e.detail)
+    return this.$root.shadowRoot.firstElementChild.prepend(e.detail)
   }
 }

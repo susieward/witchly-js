@@ -1,16 +1,11 @@
 
 export default class ListItems {
   name = 'list-items'
-  message = ''
+  state = () => ({ message: '' })
   watch = {
     message: {
       handler(newVal) {
         this.$emit('message', newVal)
-      }
-    },
-    items: {
-      handler(newVal, oldVal) {
-        console.log(newVal, oldVal)
       }
     }
   }
@@ -40,7 +35,7 @@ export default class ListItems {
         <li
           data-index={i}
           onclick={() => this.$emit('remove', i)}>
-          {item} {i}
+          {item}
         </li>
       )
     })

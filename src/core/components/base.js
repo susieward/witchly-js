@@ -4,8 +4,6 @@ const { initOptions } = require('./helpers/options')
 const staticAttrs = ['data-id', 'data-root']
 
 class BaseComponent extends HTMLElement {
-  $props
-
   get $router() {
     return this._root?.router || this.$root.$router
   }
@@ -19,7 +17,6 @@ class BaseComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    // this.#initProps()
     this.#_render().catch(err => console.error(err))
   }
 
@@ -36,22 +33,6 @@ class BaseComponent extends HTMLElement {
     }
   }
 
-  #initProps() {
-    const props = this._props || {}
-    this.$props = new Proxy(props, {
-        get(target, prop, receiver) {
-          const value = target[prop]
-          console.log(`getting ${prop}:`, value)
-          return value
-        },
-        set(target, prop, value) {
-          console.log(`setting ${prop} to val:`, value)
-          target[prop] = value
-          return true
-        }
-      })
-  }
-
   disconnectedCallback() {
     if (this._options.disconnectedCallback) {
       this._options.disconnectedCallback.call(this)
@@ -62,10 +43,11 @@ class BaseComponent extends HTMLElement {
     if (!this.isConnected) return
     newVal = _parseValue(newVal)
     oldVal = _parseValue(oldVal)
-    await this.#_update(name, newVal, oldVal)
-    if (this._options.attributeChangedCallback) {
-      this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
-    }
+    return this.#_update(name, newVal, oldVal).then(() => {
+      if (this._options.attributeChangedCallback) {
+        this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
+      }
+    })
   }
 
   async #_update(prop, newVal, oldVal) {
