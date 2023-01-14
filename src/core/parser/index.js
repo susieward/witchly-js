@@ -9,7 +9,11 @@ async function parse(val, vm) {
     if (val.constructor.name === 'Promise') {
       result = await val.then(result => parse(result, vm))
     } else if (typeof val === 'object') {
-      result = _isElement(val) ? processElements([val], vm) : parseAST(val, vm)
+      if (Array.isArray(val)) {
+        result = processElements(val, vm)
+      } else {
+        result = _isElement(val) ? processElements([val], vm) : parseAST(val, vm)
+      }
     } else if (typeof val === 'string') {
       result = parseTemplateString(val, vm)
     }
@@ -41,12 +45,14 @@ function processElements(domEls, vm, parentId = null) {
       el.children = children
     }
 
+    /*
     const listeners = el.getAttributeNames().filter(a => {
       return a.toLowerCase().includes('on') || a.startsWith(':')
     })
     if (listeners.length > 0) {
       _parseEventListeners(el, listeners, vm)
     }
+    */
 
     els.push(el)
     count++

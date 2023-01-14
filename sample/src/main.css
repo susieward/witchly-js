@@ -23,49 +23,16 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  width: 100%;
   font-size: var(--text-font-size);
   line-height: var(--text-line-height);
   background-color: var(--bg-color);
 }
 
-h1 {
-  font-weight: 300;
-  padding: 0;
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: 0.03em;
-}
-
-h2 {
-  font-weight: 300;
-  padding: 0;
-  margin: 0;
-  font-size: 20px;
-  letter-spacing: 0.03em;
-  line-height: 32px;
-}
-
-button {
-  background-color: #fff;
-  border: none;
-  border: 1px solid var(--accent-color);
-  border-radius: 5px;
-  color: var(--accent-color);
-  padding: 6px 10px;
-  font-family: var(--font-family);
-  font-size: 16px;
-  cursor: pointer;
-  width: auto;
-}
-
-input[type=text] {
-  background-color: #fff;
-  border: none;
-  border: var(--content-border);
-  border-radius: 5px;
-  color: var(--text-color);
-  padding: 6px 10px;
-  font-family: var(--font-family);
-  font-size: 16px;
+menu {
+    list-style-type: none;
+    display: grid;
+    grid-auto-flow: column;
+    padding: 0;
+    margin-bottom: 0;
+    gap: 1em;
 }

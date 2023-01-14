@@ -1,6 +1,7 @@
 const path = require("path")
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 
 module.exports = {
   mode: "development",
@@ -30,30 +31,26 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader
-          },
-          {
-            loader: "css-loader",
-            options: {
-              esModule: true,
-              modules: {
-                namedExport: true
-              }
-            }
-          }
-        ]
+        use: [MiniCssExtractPlugin.loader, "css-loader"]
       }
     ]
   },
   experiments: {
     topLevelAwait: true
   },
+  optimization: {
+    minimizer: [
+      `...`,
+      new CssMinimizerPlugin()
+    ]
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "./public/index.html")
     }),
-    new MiniCssExtractPlugin()
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css"
+    })
   ]
 }

@@ -1,19 +1,29 @@
+const AttrHandler = require('./attr-handler')
 const { parse } = require('../parser')
 const { update } = require('./helpers/reactivity')
 const { initOptions } = require('./helpers/options')
-const staticAttrs = ['data-id', 'data-root']
 
-class BaseComponent extends HTMLElement {
+class BaseComponent extends AttrHandler {
+  _constructedStyles = []
+
+  get _isRoot() {
+    return this.dataset?.root === 'true'
+  }
+
+  get $root() {
+    return this._parent?._el || document.querySelector('[data-root=true]')
+  }
+
   get $router() {
-    return this._root?.router || this.$root.$router
+    return this._parent?._router || this.$root?.$router
   }
 
   get $route() {
     return this.$router?.view?._route
   }
 
-  get $root() {
-    return this._root?._el || document.querySelector('[data-root=true]')
+  get $store() {
+    return this._parent?._store || this.$root?.$store
   }
 
   connectedCallback() {
@@ -22,14 +32,18 @@ class BaseComponent extends HTMLElement {
 
   async #_render() {
     this.attachShadow({ mode: 'open' })
-    initOptions(this, this.#_update, window.document)
+    await initOptions(this, this.#_update, window.document)
     if (this._options.createdCallback) {
-      this._options.createdCallback.call(this)
+      await Promise.resolve(this._options.createdCallback.call(this))
     }
     const dom = await this._parse()
-    this.shadowRoot.append(dom)
+    if (Array.isArray(dom)) {
+      this.shadowRoot.append(...dom)
+    } else {
+      this.shadowRoot.append(dom)
+    }
     if (this._options.connectedCallback) {
-      this._options.connectedCallback.call(this)
+      await Promise.resolve(this._options.connectedCallback.call(this))
     }
   }
 
@@ -41,13 +55,12 @@ class BaseComponent extends HTMLElement {
 
   async attributeChangedCallback(name, oldVal, newVal) {
     if (!this.isConnected) return
-    newVal = _parseValue(newVal)
-    oldVal = _parseValue(oldVal)
-    return this.#_update(name, newVal, oldVal).then(() => {
-      if (this._options.attributeChangedCallback) {
-        this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
-      }
-    })
+    newVal = this._parseValue(newVal)
+    oldVal = this._parseValue(oldVal)
+    await this.#_update(name, newVal, oldVal).catch(err => console.error(err))
+    if (this._options.attributeChangedCallback) {
+      this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
+    }
   }
 
   async #_update(prop, newVal, oldVal) {
@@ -60,28 +73,6 @@ class BaseComponent extends HTMLElement {
 
   _parse() {
     return parse(this.template, this).catch(err => console.error(err))
-  }
-
-  getAttribute(attr) {
-    const val = super.getAttribute(attr)
-    return _parseValue(val)
-  }
-
-  setAttribute(attr, newVal) {
-    if (staticAttrs.includes(attr) && this.hasAttribute(attr)) {
-      throw new Error(`Cannot redefine static attribute: ${attr}`)
-    }
-    const val = (newVal?.constructor?.name !== 'String')
-      ? JSON.stringify(newVal)
-      : newVal?.toString() || ''
-    return super.setAttribute(attr, val)
-  }
-
-  removeAttribute(attr) {
-    if (staticAttrs.includes(attr)) {
-      throw new Error(`Cannot remove static attribute: ${attr}`)
-    }
-    return super.removeAttribute(attr)
   }
 
   $emit(evtName, ...args) {
@@ -112,16 +103,6 @@ class BaseComponent extends HTMLElement {
   $go(args) {
     return this.$router.push(args)
   }
-}
-
-function _parseValue(value) {
-  try {
-    const parsed = JSON.parse(value)
-    value = parsed
-  } catch {
-    // no-op
-  }
-  return value
 }
 
 module.exports = BaseComponent

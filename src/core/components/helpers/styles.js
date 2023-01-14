@@ -1,6 +1,4 @@
-
-const toKebabCase = (str) => str.replace(/[A-Z]/g, "-$&").toLowerCase()
-const mapKeys = (obj) => Object.keys(obj).map(k => `${toKebabCase(k)}: ${obj[k]};`)
+const { _resolve, mapKeys } = require('./utils')
 
 const toCSSText = (styleMap) => {
   return Object.entries(styleMap).map(([key, val]) => {
@@ -18,20 +16,37 @@ class StyleSheet extends CSSStyleSheet {
   }
 }
 
-function initStyles(vm, doc) {
-  let styles = vm._options.styles ? [vm._options.styles] : []
-  if (doc.styleSheets.length > 0) {
-    const docStyles = [...doc.styleSheets].flatMap(sheet => {
-      return [...sheet.cssRules].map(rule => rule.cssText).join('\n')
-    })
-    styles = [...styles, ...docStyles]
+async function initStyles(vm, styleOption, doc) {
+  const resolvedStyles = await _resolve(styleOption)
+  let styles = resolvedStyles ? [resolvedStyles] : []
+
+  const parentStyles = _resolveParentStyles(vm, doc)
+
+  if (parentStyles.length > 0) {
+    styles = [...styles, ...parentStyles]
   }
   if (styles.length > 0) {
-    const constructedStyles = styles.map(cssVal => {
-      return new StyleSheet().replaceSync(cssVal)
+    styles = styles.map(val => {
+      if (val?.constructor?.name !== 'StyleSheet') {
+        return new StyleSheet().replaceSync(val)
+      }
+      return val
     })
-    vm.shadowRoot.adoptedStyleSheets = constructedStyles
   }
+  return styles
+}
+
+function _resolveParentStyles(vm, doc) {
+  let styleSheets = []
+  if (vm._isRoot) {
+    const docStyles = [...doc.styleSheets].filter(s => Boolean(s?.href) === true)
+    styleSheets = [...docStyles].flatMap(sheet => {
+      return [...sheet.cssRules].map(rule => rule.cssText).join('\n')
+    })
+  } else {
+    styleSheets = [...vm.$root._constructedStyles]
+  }
+  return styleSheets
 }
 
 module.exports = { initStyles }

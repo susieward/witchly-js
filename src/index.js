@@ -1,5 +1,7 @@
 const {
   Router,
+  StateManager,
+  MapItems,
   createComponent,
   registerComponents,
   createElementJSX,
@@ -9,9 +11,10 @@ const {
 class Witchly {
   #el
   #router
+  #store
   static #components = {}
 
-  static get components() {
+  static get _components() {
     return this.#components
   }
 
@@ -20,16 +23,30 @@ class Witchly {
   }
 
   async #init(options) {
+    MapItems.define()
     if (options.router) {
       this.#router = new Router(options.router, this)
     }
-    if (Object.values(this.constructor.components).length > 0) {
-      await registerComponents(this.constructor.components, this)
+    if (options.store) {
+      this.#store = new StateManager(options.store)
     }
+    if (Object.values(this.constructor._components).length > 0) {
+      await registerComponents(this.constructor._components, this)
+    }
+    await this.#initEl(options)
+  }
+
+  async #initEl(options) {
     const comp = await createComponent(options.render(), this)
     const el = document.getElementById(options.id)
     const newEl = new comp._ctor()
     newEl.dataset.root = true
+    Object.defineProperty(newEl, '_parent', {
+      value: this,
+      enumerable: true,
+      configureable: false,
+      writeable: false
+    })
     el.replaceWith(newEl)
     this.#el = newEl
   }
@@ -38,12 +55,20 @@ class Witchly {
     return this.#el
   }
 
-  get router() {
+  get _router() {
     return this.#router
+  }
+
+  get _store() {
+    return this.#store
   }
 
   static component(comp) {
     this.#components[comp.name] = comp
+  }
+
+  static components(comps) {
+    return comps.forEach(comp => this.component(comp))
   }
 }
 

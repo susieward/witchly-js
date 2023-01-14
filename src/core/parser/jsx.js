@@ -32,7 +32,7 @@ async function _appendChild(parent, child) {
     return
   } else if (Array.isArray(child)) {
     await Promise.all(child.map(c => _appendChild(parent, c)))
-  } else if (child.constructor.name === 'Promise') {
+  } else if (['Promise', 'AsyncFunction'].includes(child?.constructor?.name)) {
     await child.then(c => _appendChild(parent, c))
   } else {
     parent.appendChild(child.nodeType ? child : document.createTextNode(child))

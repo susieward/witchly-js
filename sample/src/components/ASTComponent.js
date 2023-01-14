@@ -14,7 +14,7 @@ const ASTComponent = {
   get buttonText() {
     return this.showMessage ? 'hide message' : 'show message'
   },
-  get template() {
+  render() {
     return {
       p: {
         children: [

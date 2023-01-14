@@ -16,7 +16,6 @@ export default class Header {
   defaultTitle = 'lightweight, hyper-flexible web components'
 
   connectedCallback() {
-    console.log(this._props.propTest)
     this.inputEl.placeholder = 'Type something'
   }
 

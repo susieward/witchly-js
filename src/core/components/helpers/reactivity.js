@@ -1,13 +1,13 @@
 
 async function update(prop, newVal, oldVal, vm) {
-  if (typeof newVal === typeof oldVal) {
-    if (newVal === oldVal) return
-  }
+  const normalizedNewVal = _normalize(newVal)
+  const normalizedOldVal = _normalize(oldVal)
+  if (normalizedNewVal === normalizedOldVal) return
   // TO DO: address issue of dom changes in connectedCallback not being reflected
   const oldDom = vm.shadowRoot.firstElementChild
   const newDom = await vm._parse()
 
-  if ((typeof newVal !== 'string') || (typeof oldVal !== 'string')) {
+  if (!['string', 'number'].includes(typeof newVal) || !['string', 'number'].includes(typeof oldVal)) {
     newVal = null
   }
 
@@ -16,7 +16,7 @@ async function update(prop, newVal, oldVal, vm) {
 
   if (newVal !== null && matches.length > 0) {
     processMatches(matches, newVal, newDom, oldDom)
-  } else {
+  } else if (!newDom.isEqualNode(oldDom)) {
     compareNodes(newDom, oldDom, newVal, newDom, oldDom)
   }
 }
@@ -34,24 +34,57 @@ function processMatches(matches, newVal, newDom, oldDom) {
   }
 }
 
-function compareNodes(newEl, oldEl, newVal, newDom, oldDom) {
-  if (newEl && !oldEl) {
-    let newParent = newEl.parentElement
+function compareNodes(newNode, oldNode, newVal, newDom, oldDom) {
+  if (newNode && !oldNode) {
+    let newParent = newNode.parentElement
     let oldParent = getNodeMatch(newParent, oldDom)
     if (!oldParent) return
-    return appendOrInsert(newEl, oldParent)
+    return appendOrInsert(newNode, oldParent)
   }
 
-  if (!newEl.isEqualNode(oldEl) && _shouldCompareNodes(newEl, oldEl)) {
-    if (newEl.nodeType === 1 && oldEl.nodeType === 1) {
-      if (newEl.hasAttributes() || oldEl.hasAttributes()) {
-        processAttrs(newEl, oldEl)
+  if (newNode.isEqualNode(oldNode)) return
+
+  if (_shouldCompareNodes(newNode, oldNode)) {
+      if (newNode.nodeType === 1 && oldNode.nodeType === 1) {
+        if (newNode.hasAttributes() || oldNode.hasAttributes()) {
+          processAttrs(newNode, oldNode)
+        }
+      }
+      if (newNode.hasChildNodes() || oldNode.hasChildNodes()) {
+        if (newNode.localName !== 'map-items') {
+          iterChildren(newNode, oldNode, newVal, newDom, oldDom)
+        }
+      }
+  } else {
+    if (newNode.nodeType === 1 && oldNode.nodeType === 1) {
+      let newParent = newNode.parentElement
+      let oldParent = getNodeMatch(newParent, oldDom)
+      if (oldParent) {
+        oldNode.replaceWith(newNode)
       }
     }
-    if (newEl.hasChildNodes() || oldEl.hasChildNodes()) {
-      iterChildren(newEl, oldEl, newVal, newDom, oldDom)
+  }
+}
+
+function processAttrs(newEl, oldEl) {
+  const attrs = newEl.getAttributeNames()
+
+  for (const attr of attrs) {
+    let newVal = _normalize(newEl.getAttribute(attr))
+    let oldVal = _normalize(oldEl.getAttribute(attr))
+    if (newVal !== oldVal && (attr !== 'data-id')) {
+      if (attr === 'data-if') {
+        oldEl.replaceWith(newEl)
+      } else {
+        oldEl.setAttribute(attr, newEl.getAttribute(attr))
+      }
     }
   }
+}
+
+function _normalize(val) {
+  if (val && typeof val === 'object') val = JSON.stringify(val)
+  return val
 }
 
 function _shouldCompareNodes(newNode, oldNode) {
@@ -61,24 +94,35 @@ function _shouldCompareNodes(newNode, oldNode) {
   if (newNodeType !== oldNodeType) return false
 
   if (newNodeType === 1 && oldNodeType === 1) {
-    if (newNode.localName !== oldNode.localName) {
-      return false
-    }
+    return (newNode.localName === oldNode.localName)
+      && (newNode.dataset.id === oldNode.dataset.id)
   }
   return true
+}
+
+function _shouldReplaceEl(newEl, oldEl, newChildren, oldChildren) {
+  if (newChildren.length !== oldChildren.length) {
+    if (
+      ((newChildren.length === 0) && (oldChildren.length > 0))
+      || ((newChildren.length > 0) && (oldChildren.length === 0))
+    ) {
+      return true
+    }
+    const newTags = newChildren.map(c => c?.nodeName?.toLowerCase())
+    const oldTags = oldChildren.map(c => c?.nodeName?.toLowerCase())
+      if (newTags.every(t => !oldTags.includes(t))) {
+        return true
+      }
+    }
+    return false
 }
 
 function iterChildren(newEl, oldEl, newVal, newDom, oldDom) {
   let newChildren = [...newEl.childNodes]
   let oldChildren = [...oldEl.childNodes]
 
-  if (newChildren.length !== oldChildren.length) {
-    if (
-      ((newChildren.length === 0) && (oldChildren.length > 0))
-      || ((newChildren.length > 0) && (oldChildren.length === 0))
-    ) {
-      return oldEl.replaceWith(newEl)
-    }
+  if (_shouldReplaceEl(newEl, oldEl, newChildren, oldChildren)) {
+    return oldEl.replaceWith(newEl)
   }
   let index = 0
 
@@ -147,21 +191,6 @@ function appendOrInsert(newChild, parent) {
   parent.append(newChild)
 }
 
-function processAttrs(newEl, oldEl) {
-  const attrs = newEl.getAttributeNames()
-  for (const attr of attrs) {
-    const newAttrVal = newEl.getAttribute(attr)
-    const oldAttrVal = oldEl.getAttribute(attr)
-    if (newAttrVal !== oldAttrVal && attr !== 'data-id') {
-      if (attr === 'data-if') {
-        oldEl.replaceWith(newEl)
-      } else {
-        oldEl.setAttribute(attr, newAttrVal)
-      }
-    }
-  }
-}
-
 function getChangedNodeMatches(exp, newDom, oldDom) {
   const newDomResults = _getXPathResults(exp, newDom)
   const matches = []
@@ -224,7 +253,7 @@ function areTextNodesEqual(node1, node2) {
 function _buildXPathExpression(newVal) {
   if (newVal == null) return `.//*`
 
-  if (newVal.includes(`"`)) {
+  if (typeof newVal === 'string' && newVal.includes(`"`)) {
     newVal = newVal.slice().replaceAll(`"`, `'`)
   }
 

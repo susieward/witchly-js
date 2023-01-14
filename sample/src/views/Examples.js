@@ -12,21 +12,21 @@ export default class Examples {
     examples: [
       {
         title: 'Text Colors (1)',
-        show: false,
+        config: { show: false },
         get template() {
           return <text-colors></text-colors>
         }
       },
       {
         title: 'CodeEditor',
-        show: false,
+        config: { show: false },
         get template() {
           return <code-editor></code-editor>
         }
       },
       {
         title: 'List Items',
-        show: false,
+        config: { show: false },
         get template() {
           return (
             <div>
@@ -44,7 +44,7 @@ export default class Examples {
       },
       {
         title: 'Text Colors (2)',
-        show: false,
+        config: { show: false },
         get template() {
           return <text-colors></text-colors>
         }
@@ -56,7 +56,7 @@ export default class Examples {
     this.addListItem('hello!')
     if (this.$route.params?.show != null) {
       const comp = this.examples[Number(this.$route.params.show)]
-      comp.show = true
+      comp.config.show = true
     }
   }
 
@@ -83,16 +83,16 @@ export default class Examples {
             onclick={() => this.toggleComp(comp)}>
             {comp.title}
           </span>
-          {(comp.show === true)
+          {(comp.config.show === true)
             ? <div class="comp">{comp.template}</div>
-            : ''}
+            : null}
         </div>
       )
     })
   }
 
   toggleComp(comp) {
-    return comp.show = !comp.show
+    return comp.config.show = !comp.config.show
   }
 
   addListItem(text) {

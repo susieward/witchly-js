@@ -1,4 +1,5 @@
 const BaseComponent = require('./base')
+const { _resolve } = require('./helpers/utils')
 
 async function createComponent(_options, root = null) {
   const options = await _preprocess(_options, root)
@@ -19,22 +20,6 @@ async function _preprocess(_options, root) {
     await registerComponents(comps, root)
   }
   return options
-}
-
-function _resolve(value) {
-  if (value?.hasOwnProperty('default')) {
-    value = value.default
-  }
-  if (value?.constructor?.name === 'Function') {
-    value = (!value.prototype) ? value() : new value()
-    if (value?.constructor?.name === 'Function') {
-      return _resolve(value)
-    }
-  }
-  if (value?.constructor?.name === 'Promise') {
-    return value.then(v => _resolve(v?.default || v))
-  }
-  return value
 }
 
 async function registerComponents(components = {}, root = null) {

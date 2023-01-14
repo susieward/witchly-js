@@ -2,17 +2,17 @@ const { observe } = require('./proxy')
 const { initStyles } = require('./styles')
 const staticProps = ['name', 'components', 'constructor']
 
-function initOptions(vm, callback, doc) {
+async function initOptions(vm, callback, doc) {
   const options = vm._options
   const descriptors = _buildDescriptorsObject(options)
   const watchedProps = options.watch ? Object.keys(options.watch) : []
 
   for (const key of Object.keys(descriptors)) {
     const desc = descriptors[key]
-    if (key === 'state' || watchedProps.includes(key)) {
-      continue
-    } else if (['template', 'render'].includes(key)) {
+    if (['template', 'render'].includes(key)) {
       _defineTemplate(desc, vm)
+    } else if ([...watchedProps, 'state', 'attrs', 'styles'].includes(key)) {
+      continue
     } else if (staticProps.includes(key)) {
       _defineStaticProp(key, desc, vm)
     } else if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
@@ -31,7 +31,14 @@ function initOptions(vm, callback, doc) {
   if (watchedProps.length > 0) {
     _defineWatchers(watchedProps, descriptors, vm)
   }
-  initStyles(vm, doc)
+  if (descriptors.styles) {
+    _defineProp(descriptors.styles, vm, 'styles')
+  }
+  const styleSheets = await initStyles(vm, vm.styles, doc)
+  if (styleSheets.length > 0) {
+    vm._constructedStyles = styleSheets
+    vm.shadowRoot.adoptedStyleSheets = vm._constructedStyles
+  }
   return vm
 }
 
@@ -42,6 +49,23 @@ function _buildDescriptorsObject(options) {
     descriptors = { ...descriptors, ...prototypeDesc }
   }
   return descriptors
+}
+
+function _defineProp(desc, vm, prop) {
+  let val
+  let getter = null
+  if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
+    val = desc.value
+  } else if (desc.hasOwnProperty('get')) {
+    getter = desc.get
+  }
+  Object.defineProperty(vm, prop, {
+    get() {
+      return getter?.call(vm) || val.call(vm, vm)
+    },
+    enumerable: true,
+    configureable: true
+  })
 }
 
 function _defineTemplate(desc, vm) {
@@ -68,7 +92,7 @@ function _defineState(desc, vm, callback) {
     throw new Error('State must be a function')
   }
   const result = desc.value.call(vm)
-  if (!result || typeof result !== 'object') {
+  if (result?.constructor?.name !== 'Object') {
     throw new Error('State must return an object')
   }
   observe(result, vm, callback)
