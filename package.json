@@ -1,6 +1,6 @@
 {
   "name": "witchly",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Lightweight, hyper-flexible, web components-based front-end framework",
   "type": "module",
   "keywords": [
@@ -12,7 +12,7 @@
   ],
   "exports": {
     ".": "./src/index.js",
-    "./jsx-runtime.js": "./jsx-runtime.js"
+    "./jsx-runtime": "./jsx-runtime.js"
   },
   "files": [
     "src",
