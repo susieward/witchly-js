@@ -18,7 +18,7 @@ export default defineConfig({
         return transformWithEsbuild(code, id, {
           loader: 'jsx',
           jsx: 'automatic',
-          jsxImportSource: '../..',
+          jsxImportSource: 'witchly',
         })
       },
     },

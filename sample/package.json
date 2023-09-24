@@ -12,7 +12,7 @@
   "author": "Susie Ward",
   "license": "ISC",
   "dependencies": {
-    "witchly": "^1.2.6"
+    "witchly": "^1.2.7"
   },
   "devDependencies": {
     "vite": "^4.4.9"
