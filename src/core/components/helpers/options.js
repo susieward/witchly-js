@@ -1,8 +1,7 @@
-const { observe } = require('./proxy')
-const { initStyles } = require('./styles')
-const staticProps = ['name', 'components', 'constructor']
+import { observe } from './proxy'
+const staticProps = ['name', 'components']
 
-async function initOptions(vm, callback, doc) {
+function initOptions(vm, callback) {
   const options = vm._options
   const descriptors = _buildDescriptorsObject(options)
   const watchedProps = options.watch ? Object.keys(options.watch) : []
@@ -11,12 +10,14 @@ async function initOptions(vm, callback, doc) {
     const desc = descriptors[key]
     if (['template', 'render'].includes(key)) {
       _defineTemplate(desc, vm)
-    } else if ([...watchedProps, 'state', 'attrs', 'styles'].includes(key)) {
+    } else if (key === 'methods') {
+      _defineMethods(desc, vm)
+    } else if ([...watchedProps, 'state', 'attrs', 'styles', 'constructor'].includes(key)) {
       continue
     } else if (staticProps.includes(key)) {
       _defineStaticProp(key, desc, vm)
     } else if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
-      _defineMethod(key, desc, vm)
+      _defineMethod(key, desc.value, vm)
     } else {
       Object.defineProperty(vm, key, desc)
     }
@@ -34,11 +35,6 @@ async function initOptions(vm, callback, doc) {
   if (descriptors.styles) {
     _defineProp(descriptors.styles, vm, 'styles')
   }
-  const styleSheets = await initStyles(vm, vm.styles, doc)
-  if (styleSheets.length > 0) {
-    vm._constructedStyles = styleSheets
-    vm.shadowRoot.adoptedStyleSheets = vm._constructedStyles
-  }
   return vm
 }
 
@@ -49,23 +45,6 @@ function _buildDescriptorsObject(options) {
     descriptors = { ...descriptors, ...prototypeDesc }
   }
   return descriptors
-}
-
-function _defineProp(desc, vm, prop) {
-  let val
-  let getter = null
-  if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
-    val = desc.value
-  } else if (desc.hasOwnProperty('get')) {
-    getter = desc.get
-  }
-  Object.defineProperty(vm, prop, {
-    get() {
-      return getter?.call(vm) || val.call(vm, vm)
-    },
-    enumerable: true,
-    configureable: true
-  })
 }
 
 function _defineTemplate(desc, vm) {
@@ -91,11 +70,28 @@ function _defineState(desc, vm, callback) {
   if (typeof desc.value !== 'function') {
     throw new Error('State must be a function')
   }
-  const result = desc.value.call(vm)
-  if (result?.constructor?.name !== 'Object') {
-    throw new Error('State must return an object')
+  const obj = desc.value.call(vm)
+  if (obj?.constructor?.name !== 'Object') {
+    throw new Error('State function must return an object')
   }
-  observe(result, vm, callback)
+  observe(obj, vm, callback)
+}
+
+function _defineProp(desc, vm, prop) {
+  let val
+  let getter = null
+  if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
+    val = desc.value
+  } else if (desc.hasOwnProperty('get')) {
+    getter = desc.get
+  }
+  Object.defineProperty(vm, prop, {
+    get() {
+      return getter?.call(vm) || val.call(vm, vm)
+    },
+    enumerable: true,
+    configureable: true
+  })
 }
 
 function _defineWatchers(watchedProps, descriptors, vm) {
@@ -156,12 +152,27 @@ function _defineStaticProp(key, desc, vm) {
   })
 }
 
-function _defineMethod(key, desc, vm) {
-  const boundFn = desc.value.bind(vm)
+function _defineMethods(desc, vm) {
+  if (desc?.value?.constructor?.name !== 'Object') {
+    throw new Error('Methods option must be an object')
+  }
+  const entries = Object.entries(desc.value)
+  for (const [key, val] of entries) {
+    Object.defineProperty(vm, key, {
+      value: function(...args) {
+        return val.apply(vm, [...args])
+      },
+      enumerable: true
+    })
+  }
+}
+
+function _defineMethod(key, value, vm) {
+  const boundFn = value.bind(vm)
   Object.defineProperty(vm, key, {
     value: boundFn,
     enumerable: true
   })
 }
 
-module.exports = { initOptions }
+export { initOptions }

@@ -1,10 +1,13 @@
-const AttrHandler = require('./attr-handler')
-const { parse } = require('../parser')
-const { update } = require('./helpers/reactivity')
-const { initOptions } = require('./helpers/options')
+import AttrHandler from './attr-handler'
+import { parse } from '../parser'
+import { update } from './helpers/reactivity'
+import { initOptions } from './helpers/options'
+import { initStyles } from './helpers/styles'
 
 class BaseComponent extends AttrHandler {
-  _constructedStyles = []
+  get componentStyles() {
+    return this.constructor.styleSheets
+  }
 
   get _isRoot() {
     return this.dataset?.root === 'true'
@@ -15,7 +18,7 @@ class BaseComponent extends AttrHandler {
   }
 
   get $router() {
-    return this._parent?._router || this.$root?.$router
+    return this._isRoot ? this._parent?._router : this.$root?.$router
   }
 
   get $route() {
@@ -23,7 +26,7 @@ class BaseComponent extends AttrHandler {
   }
 
   get $store() {
-    return this._parent?._store || this.$root?.$store
+    return this._isRoot ? this._parent?._store : this.$root?.$store
   }
 
   connectedCallback() {
@@ -32,18 +35,29 @@ class BaseComponent extends AttrHandler {
 
   async #_render() {
     this.attachShadow({ mode: 'open' })
-    await initOptions(this, this.#_update, window.document)
+    await this.#_initOptions()
     if (this._options.createdCallback) {
       await Promise.resolve(this._options.createdCallback.call(this))
     }
-    const dom = await this._parse()
-    if (Array.isArray(dom)) {
-      this.shadowRoot.append(...dom)
+    const el = await this._parse()
+    if (!this.shadowRoot.firstElementChild) {
+      this.shadowRoot.append(el)
     } else {
-      this.shadowRoot.append(dom)
+      this.shadowRoot.firstElementChild.replaceWith(el)
     }
     if (this._options.connectedCallback) {
       await Promise.resolve(this._options.connectedCallback.call(this))
+    }
+  }
+
+  async #_initOptions() {
+    initOptions(this, this.#_update)
+    if (!this.componentStyles) {
+      const styleSheets = await initStyles(this, this.styles, window.document)
+      this.constructor.styleSheets = styleSheets
+    }
+    if (this.componentStyles.length > 0) {
+      this.shadowRoot.adoptedStyleSheets = this.componentStyles
     }
   }
 
@@ -61,18 +75,23 @@ class BaseComponent extends AttrHandler {
     if (this._options.attributeChangedCallback) {
       this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
     }
+    this.#_triggerWatcher(prop, newVal, oldVal)
   }
 
   async #_update(prop, newVal, oldVal) {
     if (!this.shadowRoot?.firstChild) return
     await update(prop, newVal, oldVal, this).catch(err => console.error(err))
+    this.#_triggerWatcher(prop, newVal, oldVal)
+  }
+
+  async _parse(val = this.template, vm = this) {
+    return parse(val, vm).catch(err => console.error(err))
+  }
+
+  #_triggerWatcher(prop, newVal, oldVal) {
     if (this.watch && this.watch[prop]) {
       this.watch[prop].handler.call(this, newVal, oldVal)
     }
-  }
-
-  _parse() {
-    return parse(this.template, this).catch(err => console.error(err))
   }
 
   $emit(evtName, ...args) {
@@ -105,4 +124,4 @@ class BaseComponent extends AttrHandler {
   }
 }
 
-module.exports = BaseComponent
+export default BaseComponent

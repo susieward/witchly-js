@@ -10,18 +10,15 @@ const Sidenav = (props, children) => {
 
   const styles = (`
     .link {
-      color: var(--accent-color);
+      color: var(--text-color-light);
       cursor: pointer;
       margin-right: auto;
     }
     .sidenav {
       display: grid;
       align-content: flex-start;
-      background-color: var(--content-bg-color);
-      border: var(--content-border);
-      border-radius: 5px;
-      padding: 12px 20px;
-      height: auto;
+      max-height: 100%;
+      padding: 15px 30px;
     }
     .sidenav h2 {
       display: inline-block;
@@ -33,15 +30,13 @@ const Sidenav = (props, children) => {
   `)
 
   return (
-    <div>
       <aside class="sidenav">
         {navLinks}
         {children}
-      </aside>
-      <style>
+        <style>
         {styles}
       </style>
-    </div>
+      </aside>
   )
 }
 

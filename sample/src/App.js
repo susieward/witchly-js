@@ -26,13 +26,15 @@ const App = async () => {
       return (
         <div id="app">
           <app-header propTest="hi"></app-header>
-          {this.message}
           <main class="main">
             <Sidenav
               onclick={(path) => this.$go(path)}
               links={links}>
             </Sidenav>
-            <router-view></router-view>
+            <div class="wrapper">
+              <router-view></router-view>
+              {this.message}
+            </div>
           </main>
         </div>
       )
@@ -44,21 +46,22 @@ const App = async () => {
       return (
         `#app {
           display: grid;
-          grid-row-gap: 50px;
-          min-width: 100vw;
+          grid-template-rows: auto 1fr;
           margin: 0;
           padding: 0;
         }
 
         .main {
           display: grid;
-          grid-template-columns: minmax(100px, 20%) 1fr;
-          grid-row-gap: 20px;
-          grid-column-gap: 2rem;
+          height: 100%;
           width: 100%;
           max-width: 1250px;
-          min-height: auto;
-          margin: 0 auto;
+          margin: 30px auto 0 auto;
+          grid-template-columns: 200px 1fr;
+        }
+
+        .wrapper {
+          display: grid;
         }
 
         h1 {
@@ -70,12 +73,19 @@ const App = async () => {
         }
 
         h2 {
-          font-weight: 300;
-          padding: 0;
-          margin: 0;
-          font-size: 20px;
-          letter-spacing: 0.03em;
+          font-weight: 600;
+          font-style: normal;
+          font-size: 24px;
+          margin: 0 0 16px 0;
+          letter-spacing: -.02em;
           line-height: 32px;
+          color: var(--text-color)
+        }
+
+        h4 {
+          margin: 0 0 12px 0;
+          letter-spacing: -.01em;
+          color: var(--text-color-light)
         }
 
         button {

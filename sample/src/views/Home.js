@@ -4,7 +4,6 @@ export default class Home {
   name = 'home-view'
   components = { CodeEditor }
   state = () => ({ paramsMessage: '' })
-  // props = ['id']
 
   get id() {
     return this.$route.params.id
@@ -12,7 +11,6 @@ export default class Home {
 
   connectedCallback() {
     this.$root.addEventListener('hi', this.hi)
-    // this.paramsMessage = 'blah'
   }
 
   disconnectedCallback() {
@@ -22,24 +20,27 @@ export default class Home {
   render() {
     return (
       <app-content title-text="Home">
-      Id: {this.id}. {this.paramsMessage} params message
-      <p>
-        <button onclick={() => this.$go('/test/3')}>
+      <strong data-if={this.id || this.paramsMessage}>
+        <span data-if={this.id}>Id: {this.id}.</span>
+        <span data-if={this.paramsMessage}>
+          Params message: {this.paramsMessage}
+        </span>
+      </strong>
+        <button style="margin-right: auto" onclick={() => this.$go('/test/3')}>
           test: 3
         </button>
-      </p>
       <p>
         <input type="text" oninput={(e) => this.paramsMessage = e.target.value} />
         {this.paramsMessage}
-        </p>
-      <p>
         <button id="params-btn" onclick={() => this.navigate()}>
           examples: {this.paramsMessage}
         </button>
         </p>
         <code-editor></code-editor>
         <button id="button" onclick={() => this.$emit('hi', 'hi')}>hi</button>
-        {this.paramsMessage}
+        <span data-if={this.paramsMessage}>
+          {this.paramsMessage}
+        </span>
       </app-content>
     )
   }

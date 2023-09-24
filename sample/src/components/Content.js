@@ -9,8 +9,8 @@ export default {
     )
   },
   get styles() {
-    return (
-      `.content {
+    return (`
+      .content {
         display: grid;
         width: 100%;
         max-width: 900px;
@@ -18,8 +18,8 @@ export default {
         box-shadow: 0 6px 8px rgb(85 102 119 / 3%), 0 1px 1px rgb(85 102 119 / 40%);
         background-color: #fff;
         border: 1px solid transparent;
-        border-radius: 3px;
-        padding: 25px 30px;
+        border-radius: 5px;
+        padding: 28px 35px 30px 35px;
       }`
     )
   }

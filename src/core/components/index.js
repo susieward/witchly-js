@@ -1,5 +1,5 @@
-const BaseComponent = require('./base')
-const { _resolve } = require('./helpers/utils')
+import BaseComponent from './base'
+import { _resolve } from './helpers/utils'
 
 async function createComponent(_options, root = null) {
   const options = await _preprocess(_options, root)
@@ -31,6 +31,19 @@ async function registerComponents(components = {}, root = null) {
 
 function _createCtor(options, root = null) {
   return class extends BaseComponent {
+    static #_styleSheets = null
+
+    static get styleSheets() {
+      return this.#_styleSheets
+    }
+
+    static set styleSheets(val) {
+      if (!this.#_styleSheets) {
+        this.#_styleSheets = val
+      }
+      return true
+    }
+
     static get observedAttributes() {
       return options.observedAttributes || options.constructor.observedAttributes
     }
@@ -45,4 +58,4 @@ function _createCtor(options, root = null) {
   }
 }
 
-module.exports = { createComponent, registerComponents }
+export { createComponent, registerComponents }

@@ -136,4 +136,4 @@ function observe(obj, vm, callback) {
   Object.defineProperties(vm, Object.fromEntries(descMap))
 }
 
-module.exports = { observe }
+export { observe }

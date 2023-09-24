@@ -4,8 +4,9 @@
   "description": "",
   "main": "src/main.js",
   "scripts": {
-    "serve": "webpack-dev-server",
-    "build": "webpack --config webpack.config.js --mode production",
+    "serve": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Susie Ward",
@@ -14,30 +15,6 @@
     "witchly": "^1.2.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.5",
-    "@babel/plugin-syntax-import-assertions": "^7.20.0",
-    "@babel/preset-react": "^7.17.12",
-    "babel-loader": "^8.2.5",
-    "css-loader": "^6.7.1",
-    "css-minimizer-webpack-plugin": "^4.2.2",
-    "html-webpack-plugin": "^5.5.0",
-    "mini-css-extract-plugin": "^2.6.1",
-    "webpack": "^5.73.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.9.2"
-  },
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-react",
-        {
-          "runtime": "automatic",
-          "importSource": "witchly"
-        }
-      ]
-    ],
-    "plugins": [
-      "@babel/plugin-syntax-import-assertions"
-    ]
+    "vite": "^4.4.9"
   }
 }

@@ -1,4 +1,4 @@
-const RouterView = require('./view')
+import RouterView from './view'
 
 class Router {
   #root
@@ -37,4 +37,4 @@ class Router {
   }
 }
 
-module.exports = Router
+export default Router

@@ -1,4 +1,4 @@
-const { _resolve, mapKeys } = require('./utils')
+import { _resolve, mapKeys } from './utils'
 
 const toCSSText = (styleMap) => {
   return Object.entries(styleMap).map(([key, val]) => {
@@ -44,9 +44,10 @@ function _resolveParentStyles(vm, doc) {
       return [...sheet.cssRules].map(rule => rule.cssText).join('\n')
     })
   } else {
-    styleSheets = [...vm.$root._constructedStyles]
+    const parentStyles = vm.$root.constructor.styleSheets || []
+    styleSheets = [...parentStyles]
   }
   return styleSheets
 }
 
-module.exports = { initStyles }
+export { initStyles }

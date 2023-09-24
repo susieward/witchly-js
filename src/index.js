@@ -1,4 +1,4 @@
-const {
+import {
   Router,
   StateManager,
   MapItems,
@@ -6,7 +6,7 @@ const {
   registerComponents,
   createElementJSX,
   createFragmentJSX
-} = require('./core')
+} from './core'
 
 class Witchly {
   #el
@@ -72,6 +72,5 @@ class Witchly {
   }
 }
 
-module.exports = Witchly
-module.exports.createElementJSX = createElementJSX
-module.exports.createFragmentJSX = createFragmentJSX
+export default Witchly
+export { createElementJSX, createFragmentJSX }

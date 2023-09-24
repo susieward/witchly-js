@@ -1,4 +1,4 @@
-const AttrHandler = require('./attr-handler')
+import AttrHandler  from './attr-handler'
 
 class MapItems extends AttrHandler {
   constructor() {
@@ -35,7 +35,7 @@ class MapItems extends AttrHandler {
     const items = this.getAttribute('items')
     if (Array.isArray(items) && items.length > 0) {
       const promises = items.map((item, i) => {
-        return Promise.resolve(this._props['data-for'].apply(this.parentComponent, [item, i]))
+        return Promise.resolve(this._props['callback'].apply(this.parentComponent, [item, i]))
       })
       const results = await Promise.all(promises)
       this.replaceChildren(...results)
@@ -43,4 +43,4 @@ class MapItems extends AttrHandler {
   }
 }
 
-module.exports = MapItems
+export default MapItems

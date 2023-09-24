@@ -58,13 +58,13 @@ export default class Header {
     return (`
       #header {
         display: grid;
-        min-width: 100%;
+        max-width: 100%;
+        height: auto;
         letter-spacing: 0.03em;
         grid-auto-flow: column;
         align-content: center;
         background-color: var(--content-bg-color);
-        border-bottom: var(--content-border);
-        padding: 20px 28px;
+        padding: 20px 30px;
       }
 
       .header-right {
@@ -82,6 +82,15 @@ export default class Header {
         grid-auto-flow: column;
         align-content: center;
         grid-column-gap: 15px;
+      }
+      
+      #header h2 {
+        font-weight: 300;
+        padding: 0;
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: 0.03em;
+        line-height: 32px;
       }`
     )
   }

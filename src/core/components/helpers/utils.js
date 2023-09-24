@@ -25,4 +25,4 @@ function _isElement(val) {
   return val?.childNodes?.constructor?.name === 'NodeList'
 }
 
-module.exports = { _resolve, toKebabCase, mapKeys, _isElement }
+export { _resolve, toKebabCase, mapKeys, _isElement }

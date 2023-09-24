@@ -1,4 +1,4 @@
-const { createElementJSX, createFragmentJSX } = require('./jsx')
+import { createElementJSX, createFragmentJSX } from './jsx'
 
 async function parse(val, vm) {
   if (!val) {
@@ -28,50 +28,49 @@ function _isElement(val) {
 }
 
 function processElements(domEls, vm, parentId = null) {
-  let count = 0
   const els = []
+  const nodeNames = {}
 
   for (const el of domEls) {
-    let id = `${el.localName}-${count}`
-    if (parentId) id = `${el.localName}-${count}-${parentId}`
-    el.setAttribute('data-id', id)
-
-    if (el.hasAttribute('data-if')) {
-      _parseConditionalExp(el)
+    if (el?.nodeType === 1) {
+      const name = el.nodeName.toLowerCase()
+      if (!nodeNames[name]) {
+        nodeNames[name] = 0
+      }
+      nodeNames[name] += 1
+      if (el.hasAttribute('data-if')) {
+        let value = el.dataset.if
+        const result = _parseConditionalExp(value)
+        el.dataset.if = result
+        if (!result) {
+          let style = 'display: none;'
+          if (el.hasAttribute('style')) {
+            style = `${el.getAttribute('style')}; ${style}`
+          }
+          el.setAttribute('style', style)
+        }
+      }
+      const nameCount = nodeNames[name]
+      let id = `${el.localName}-${nameCount}`
+      if (parentId) id = `${id}-${parentId}`
+      el.setAttribute('data-id', id)
+  
+      if (el.childNodes?.length > 0) {
+        let children = processElements(el.childNodes, vm, id)
+        if (!Array.isArray(children)) children = [children]
+        el.replaceChildren(...children)
+      }
     }
-
-    if (el.children?.length > 0) {
-      const children = processElements(el.children, vm, id)
-      el.children = children
-    }
-
-    /*
-    const listeners = el.getAttributeNames().filter(a => {
-      return a.toLowerCase().includes('on') || a.startsWith(':')
-    })
-    if (listeners.length > 0) {
-      _parseEventListeners(el, listeners, vm)
-    }
-    */
-
     els.push(el)
-    count++
   }
   return els.length === 1 ? els[0] : els
 }
 
-function _parseConditionalExp(el) {
-  let value = el.dataset.if
+function _parseConditionalExp(value) {
   if (['undefined', 'null', 'false'].includes(value)) {
     value = false
   }
-  if (value === false) {
-    let style = 'display: none;'
-    if (el.hasAttribute('style')) {
-      style = `${el.getAttribute('style')}; ${style}`
-    }
-    el.setAttribute('style', style)
-  }
+  return Boolean(value)
 }
 
 function _parseEventListeners(el, attrs, vm) {
@@ -169,4 +168,4 @@ function _createElement(tag, attrs = {}, children = null) {
   return el
 }
 
-module.exports = { parse, createElementJSX, createFragmentJSX }
+export { parse, createElementJSX, createFragmentJSX }

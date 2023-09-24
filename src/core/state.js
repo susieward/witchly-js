@@ -55,4 +55,4 @@ class StateManager {
   }
 }
 
-module.exports = StateManager
+export default StateManager

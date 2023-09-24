@@ -1,15 +1,15 @@
-const {
+import {
   createElementJSX,
   createFragmentJSX,
-} = require('./src')
+} from './src'
 
 
 function renderJSX(tag, props) {
   return createElementJSX(tag, props)
 }
 
-module.exports = {
-  jsx: createElementJSX,
-  jsxs: renderJSX,
-  Fragment: createFragmentJSX
-}
+const jsx = createElementJSX
+const jsxs = renderJSX
+const Fragment = createFragmentJSX
+
+export { jsx, jsxs, Fragment }

@@ -59,4 +59,4 @@ function createFragmentJSX(props, ...children) {
   return children
 }
 
-module.exports = { createElementJSX, createFragmentJSX }
+export { createElementJSX, createFragmentJSX }

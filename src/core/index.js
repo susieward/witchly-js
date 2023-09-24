@@ -1,10 +1,10 @@
-const Router = require('./router')
-const StateManager = require('./state')
-const MapItems = require('./components/map-items')
-const { createComponent, registerComponents } = require('./components')
-const { createElementJSX, createFragmentJSX } = require('./parser')
+import Router from './router'
+import StateManager from './state'
+import MapItems from './components/map-items'
+import { createComponent, registerComponents } from './components'
+import { createElementJSX, createFragmentJSX } from './parser'
 
-module.exports = {
+export {
   Router,
   StateManager,
   createComponent,

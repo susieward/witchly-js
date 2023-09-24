@@ -35,4 +35,4 @@ class AttrHandler extends HTMLElement {
   }
 }
 
-module.exports = AttrHandler
+export default AttrHandler

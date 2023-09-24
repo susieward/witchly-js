@@ -18,7 +18,17 @@ export default class TextColors {
         </span>
         <div>
         Text colors (click to change):
-          <ul>{this.colorsList}</ul>
+        <map-items
+          items={this.colors}
+          callback={(color) => {
+            return (
+              <button style={`color: ${color}; border: 1px solid ${color}`}
+            onclick={() => this.color = color}>
+            {color}
+          </button>
+            )
+          }}>
+          </map-items>
           <p>Current color: <span class="color">{this.color}</span></p>
           <input id="new-color" type="text" value="" />
           <button onclick={() => this.addColor()}>

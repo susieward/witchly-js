@@ -1,4 +1,4 @@
-const { createComponent } = require('../components')
+import { createComponent } from '../components'
 
 class RouterView extends HTMLElement {
   #components = {}
@@ -172,4 +172,4 @@ function normalizePathString(path) {
   return normalized
 }
 
-module.exports = RouterView
+export default RouterView

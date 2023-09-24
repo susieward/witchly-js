@@ -1,11 +1,10 @@
 import Witchly from 'witchly'
 const App = () => import('./App')
 const Content = () => import('./components/Content')
-import { Section, Subheader } from './components/Section'
 import router from './router'
 import store from './store'
 
-Witchly.components([Content, Section, Subheader])
+Witchly.component(Content)
 
 new Witchly({
   id: 'app',

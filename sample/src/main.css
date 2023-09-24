@@ -4,7 +4,8 @@
   --content-bg-color: #fff;
   --content-border: 1px solid #ccc;
   --accent-color: #8066cc;
-  --text-color: #15141a;
+  --text-color: #3c3c43;
+  --text-color-light: #626268;
   --text-font-size: 16px;
   --text-line-height: 32px;
   --font-family: 'system-ui';
@@ -15,14 +16,12 @@
 }
 
 body {
-  display: grid;
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-color);
   margin: 0;
   padding: 0;
-  height: 100vh;
   font-size: var(--text-font-size);
   line-height: var(--text-line-height);
   background-color: var(--bg-color);
