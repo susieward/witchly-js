@@ -30,13 +30,11 @@ const Sidenav = (props, children) => {
   `)
 
   return (
-      <aside class="sidenav">
-        {navLinks}
-        {children}
-        <style>
-        {styles}
-      </style>
-      </aside>
+    <aside class="sidenav">
+      {navLinks}
+      {children}
+      <style>{styles}</style>
+    </aside>
   )
 }
 

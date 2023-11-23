@@ -75,7 +75,7 @@ class BaseComponent extends AttrHandler {
     if (this._options.attributeChangedCallback) {
       this._options.attributeChangedCallback.call(this, name, oldVal, newVal)
     }
-    this.#_triggerWatcher(prop, newVal, oldVal)
+    this.#_triggerWatcher(name, newVal, oldVal)
   }
 
   async #_update(prop, newVal, oldVal) {
@@ -84,8 +84,8 @@ class BaseComponent extends AttrHandler {
     this.#_triggerWatcher(prop, newVal, oldVal)
   }
 
-  async _parse(val = this.template, vm = this) {
-    return parse(val, vm).catch(err => console.error(err))
+  async _parse() {
+    return parse(this.template, this).catch(err => console.error(err))
   }
 
   #_triggerWatcher(prop, newVal, oldVal) {

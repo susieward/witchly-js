@@ -1,6 +1,5 @@
 
 export default class TextColors {
-  name = 'text-colors'
   state = () => ({
     color: '',
     colors: ['pink', 'slateblue', 'skyblue', 'turquoise', 'hotpink']

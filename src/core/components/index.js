@@ -1,10 +1,12 @@
 import BaseComponent from './base'
-import { _resolve } from './helpers/utils'
+import { _resolve, toKebabCase } from './helpers/utils'
 
 async function createComponent(_options, root = null) {
   const options = await _preprocess(_options, root)
+  let name = toKebabCase(options?.name || options?.constructor?.name)
+  options.name = name
   const comp = {
-    name: options.name,
+    name: name,
     _ctor: _createCtor(options, root)
   }
   if (!customElements.get(comp.name)) {

@@ -1,7 +1,6 @@
-const CodeEditor = () => import('@/components/CodeEditor')
+const CodeEditor = () => import('@/CodeEditor')
 
-export default class Home {
-  name = 'home-view'
+export default class HomeView {
   components = { CodeEditor }
   state = () => ({ paramsMessage: '' })
 
@@ -19,7 +18,7 @@ export default class Home {
 
   render() {
     return (
-      <app-content title-text="Home">
+      <div>
       <strong data-if={this.id || this.paramsMessage}>
         <span data-if={this.id}>Id: {this.id}.</span>
         <span data-if={this.paramsMessage}>
@@ -41,7 +40,7 @@ export default class Home {
         <span data-if={this.paramsMessage}>
           {this.paramsMessage}
         </span>
-      </app-content>
+      </div>
     )
   }
 

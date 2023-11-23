@@ -1,4 +1,5 @@
 import { createElementJSX, createFragmentJSX } from './jsx'
+import { _isElement } from '../components/helpers/utils'
 
 async function parse(val, vm) {
   if (!val) {
@@ -21,10 +22,6 @@ async function parse(val, vm) {
   } catch (err) {
     console.error(err)
   }
-}
-
-function _isElement(val) {
-  return val.childNodes?.constructor?.name === 'NodeList'
 }
 
 function processElements(domEls, vm, parentId = null) {
@@ -71,48 +68,6 @@ function _parseConditionalExp(value) {
     value = false
   }
   return Boolean(value)
-}
-
-function _parseEventListeners(el, attrs, vm) {
-  for (const attr of attrs) {
-    if (attr?.startsWith(':')) {
-      const val = el.getAttribute(attr)
-      if (vm[val] !== undefined) {
-        el.addEventListener('input', function(e) {
-          return vm[val] = e.detail || e.target.value
-        })
-      }
-    } else {
-      _parseEvent(attr, el, vm)
-    }
-  }
-}
-
-function _parseEvent(attr, el, vm) {
-  const val = el.getAttribute(attr)
-  const evt = attr.substring(2)
-  let evtArgs = ''
-  let fn = val.slice()
-
-  if (fn.includes(`(`)) {
-    fn = fn.substring(0, fn.indexOf(`(`))
-    evtArgs = val.substring(val.indexOf(`(`) + 1, val.indexOf(`)`)).replaceAll(`'`, ``)
-    evtArgs = evtArgs.split(',')
-  }
-
-  let callback = vm[fn]
-  if (callback) {
-    if (evtArgs.length > 0) {
-      el.addEventListener(evt, function() {
-        return callback.apply(vm, [...evtArgs])
-      })
-    } else {
-      el.addEventListener(evt, function(...args) {
-        return callback.call(vm, ...args)
-      })
-    }
-    el.removeAttribute(attr)
-  }
 }
 
 function parseTemplateString(template, vm) {

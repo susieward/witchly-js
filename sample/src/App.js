@@ -1,5 +1,6 @@
 
 const App = async () => {
+  const Sidenav = await import('@/components/Sidenav')
   const links = [
     { name: 'Home', path: '/' },
     { name: 'Examples', path: '/examples', params: { show: 3 }},
@@ -7,13 +8,8 @@ const App = async () => {
     { name: 'Test', params: { id: 'blah' } }
   ]
 
-  const [Sidenav] = await Promise.all([
-    import('@/components/Sidenav'),
-    import('./main.css')
-  ])
-
   return {
-    name: 'witchly-app',
+    name: 'WitchlyApp',
     components: {
       Header: () => import('@/components/Header')
     },
@@ -50,7 +46,7 @@ const App = async () => {
           margin: 0;
           padding: 0;
         }
-
+        
         .main {
           display: grid;
           height: 100%;
@@ -59,11 +55,11 @@ const App = async () => {
           margin: 30px auto 0 auto;
           grid-template-columns: 200px 1fr;
         }
-
+        
         .wrapper {
           display: grid;
         }
-
+        
         h1 {
           font-weight: 300;
           padding: 0;
@@ -71,7 +67,7 @@ const App = async () => {
           font-size: 28px;
           letter-spacing: 0.03em;
         }
-
+        
         h2 {
           font-weight: 600;
           font-style: normal;
@@ -81,13 +77,13 @@ const App = async () => {
           line-height: 32px;
           color: var(--text-color)
         }
-
+        
         h4 {
           margin: 0 0 12px 0;
           letter-spacing: -.01em;
           color: var(--text-color-light)
         }
-
+        
         button {
           background-color: #fff;
           border: none;
@@ -100,7 +96,7 @@ const App = async () => {
           cursor: pointer;
           width: auto;
         }
-
+        
         input[type=text] {
           background-color: #fff;
           border: none;

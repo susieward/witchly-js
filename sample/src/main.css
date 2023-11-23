@@ -26,12 +26,3 @@ body {
   line-height: var(--text-line-height);
   background-color: var(--bg-color);
 }
-
-menu {
-    list-style-type: none;
-    display: grid;
-    grid-auto-flow: column;
-    padding: 0;
-    margin-bottom: 0;
-    gap: 1em;
-}

@@ -10,8 +10,7 @@ const Title = (props) => {
   )
 }
 
-export default class Header {
-  name = 'app-header'
+export default class AppHeader {
   state = () => ({ textVal: '' })
   defaultTitle = 'lightweight, hyper-flexible web components'
 

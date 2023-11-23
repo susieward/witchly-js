@@ -3,6 +3,7 @@ const App = () => import('./App')
 const Content = () => import('./components/Content')
 import router from './router'
 import store from './store'
+import './main.css'
 
 Witchly.component(Content)
 

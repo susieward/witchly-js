@@ -1,6 +1,5 @@
 
 export default class CodeEditor {
-  name = 'code-editor'
   defaultContent = '<p>Edit me!</p>'
   state = () => ({ outputHTML: '' })
 

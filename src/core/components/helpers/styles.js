@@ -18,8 +18,7 @@ class StyleSheet extends CSSStyleSheet {
 
 async function initStyles(vm, styleOption, doc) {
   const resolvedStyles = await _resolve(styleOption)
-  let styles = resolvedStyles ? [resolvedStyles] : []
-
+  let styles = [resolvedStyles].filter(result => Boolean(result))
   const parentStyles = _resolveParentStyles(vm, doc)
 
   if (parentStyles.length > 0) {
@@ -39,7 +38,7 @@ async function initStyles(vm, styleOption, doc) {
 function _resolveParentStyles(vm, doc) {
   let styleSheets = []
   if (vm._isRoot) {
-    const docStyles = [...doc.styleSheets].filter(s => Boolean(s?.href) === true)
+    const docStyles = [...doc.styleSheets]
     styleSheets = [...docStyles].flatMap(sheet => {
       return [...sheet.cssRules].map(rule => rule.cssText).join('\n')
     })

@@ -1,14 +1,14 @@
-const toKebabCase = (str) => str.replace(/[A-Z]/g, "-$&").toLowerCase()
+const toKebabCase = (str) => str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()
 const mapKeys = (obj) => Object.keys(obj).map(k => `${toKebabCase(k)}: ${obj[k]};`)
 
 function _resolve(value) {
-  if (value?.hasOwnProperty('default')) {
+  if (value?.default) {
     value = value.default
   }
   if (_isFn(value)) {
     value = (!value.prototype) ? value() : new value()
     if (_isFn(value)) {
-      return _resolve(value)
+      return _resolve(value?.default || value)
     }
   }
   if (value?.constructor?.name === 'Promise') {
