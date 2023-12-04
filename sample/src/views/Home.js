@@ -1,4 +1,4 @@
-const CodeEditor = () => import('@/CodeEditor')
+const CodeEditor = () => import('@/components/CodeEditor')
 
 export default class HomeView {
   components = { CodeEditor }

@@ -13,21 +13,21 @@ export default class Examples {
       {
         title: 'Text Colors (1)',
         config: { show: false },
-        get template() {
+        get body() {
           return <text-colors></text-colors>
         }
       },
       {
         title: 'CodeEditor',
         config: { show: false },
-        get template() {
+        get body() {
           return <code-editor></code-editor>
         }
       },
       {
         title: 'List Items',
         config: { show: false },
-        get template() {
+        get body() {
           return (
             <div>
               <button onclick={() => this.addListItem('hello!')}>
@@ -45,7 +45,7 @@ export default class Examples {
       {
         title: 'Text Colors (2)',
         config: { show: false },
-        get template() {
+        get body() {
           return <text-colors></text-colors>
         }
       }
@@ -62,7 +62,7 @@ export default class Examples {
 
   render() {
     return (
-      <app-content title-text={this.title}>
+      <div>
       {this.$route.params.message}
         <span data-if={Boolean(this.message)}>
           {this.message}
@@ -70,7 +70,7 @@ export default class Examples {
         <div id="examples">
           {this.comps}
         </div>
-      </app-content>
+      </div>
     )
   }
 
@@ -84,7 +84,7 @@ export default class Examples {
             {comp.title}
           </span>
           {(comp.config.show === true)
-            ? <div class="comp">{comp.template}</div>
+            ? <div class="comp">{comp.body}</div>
             : null}
         </div>
       )
@@ -99,6 +99,7 @@ export default class Examples {
     let uuid = self.crypto.randomUUID()
     const index = uuid
     this.items.push(`${text} ${index}`)
+    console.log(this.items)
   }
 
   removeItem(index) {

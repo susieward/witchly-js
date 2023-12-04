@@ -1,4 +1,4 @@
-const path = require("path");
+import path from "node:path"
 import { defineConfig, transformWithEsbuild } from 'vite'
 
 export default defineConfig({
@@ -21,6 +21,7 @@ export default defineConfig({
           jsxImportSource: 'witchly',
         })
       },
+      enforce: 'pre'
     },
   ],
   optimizeDeps: {

@@ -1,6 +1,8 @@
 
 class AttrHandler extends HTMLElement {
-  #staticAttrs = ['data-id', 'data-root']
+  get staticAttrs() {
+    return ['data-id', 'data-root']
+  }
 
   getAttribute(attr) {
     const val = super.getAttribute(attr)
@@ -8,7 +10,7 @@ class AttrHandler extends HTMLElement {
   }
 
   setAttribute(attr, newVal) {
-    if (this.#staticAttrs.includes(attr) && this.hasAttribute(attr)) {
+    if (this.staticAttrs.includes(attr) && this.hasAttribute(attr)) {
       throw new Error(`Cannot redefine static attribute: ${attr}`)
     }
     const val = (newVal?.constructor?.name !== 'String')
@@ -18,7 +20,7 @@ class AttrHandler extends HTMLElement {
   }
 
   removeAttribute(attr) {
-    if (this.#staticAttrs.includes(attr)) {
+    if (this.staticAttrs.includes(attr)) {
       throw new Error(`Cannot remove static attribute: ${attr}`)
     }
     return super.removeAttribute(attr)

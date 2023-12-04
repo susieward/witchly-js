@@ -5,6 +5,7 @@ export default class ListItems {
   watch = {
     message: {
       handler(newVal) {
+        console.log(newVal)
         this.$emit('message', newVal)
       }
     }

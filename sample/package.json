@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/main.js",
+  "type": "module",
   "scripts": {
     "serve": "vite",
     "build": "vite build",
@@ -12,7 +13,7 @@
   "author": "Susie Ward",
   "license": "ISC",
   "dependencies": {
-    "witchly": "^1.2.9"
+    "witchly": "^1.3.0"
   },
   "devDependencies": {
     "vite": "^4.4.9"

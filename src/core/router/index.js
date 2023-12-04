@@ -1,12 +1,12 @@
 import RouterView from './view'
 
 class Router {
-  #root
-  #routes = []
+  _root
+  _routes = []
 
   constructor({ routes }, root) {
-    this.#root = root
-    this.#routes = routes
+    this._root = root
+    this._routes = routes
     customElements.define('router-view',
       class extends RouterView {
         get routes() {
@@ -21,7 +21,7 @@ class Router {
   }
 
   get el() {
-    return this.#root._el
+    return this._root._el
   }
 
   get view() {
@@ -29,7 +29,7 @@ class Router {
   }
 
   get routes() {
-    return this.#routes
+    return this._routes
   }
 
   push(data) {
