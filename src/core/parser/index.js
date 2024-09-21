@@ -1,5 +1,4 @@
 import { createElementJSX, createFragmentJSX } from './jsx'
-import { _isElement } from '../components/helpers/utils'
 
 async function parse(val, vm) {
   if (!val) {
@@ -8,12 +7,12 @@ async function parse(val, vm) {
   let result = ''
   try {
     if (val.constructor.name === 'Promise') {
-      result = await val.then(result => parse(result, vm))
+      result = await val.then(r => parse(r, vm))
     } else if (typeof val === 'object') {
       if (Array.isArray(val)) {
         result = processElements(val, vm)
       } else {
-        result = _isElement(val) ? processElements([val], vm) : parseAST(val, vm)
+        result = (val instanceof Node) ? processElements([val], vm) : parseAST(val, vm)
       }
     } else if (typeof val === 'string') {
       result = parseTemplateString(val, vm)

@@ -1,12 +1,24 @@
-const CodeEditor = () => import('@/components/CodeEditor')
+const CodeEditor =  () => import('@/components/CodeEditor')
+const Form = () => import('@/components/Form')
 
-export default class HomeView {
-  components = { CodeEditor }
-  state = () => ({ paramsMessage: '' })
-
-  get id() {
-    return this.$route.params.id
-  }
+export default class Home {
+  name = 'home-view'
+  title = 'Home'
+  components = { CodeEditor, Form }
+  state = () => ({ 
+    paramsMessage: '',
+    fields: [
+      [
+        { name: 'First Name', value: 'Piper', type: 'text' }, 
+        { name: 'Last Name', value: '', type: 'text' }
+      ],
+      [
+        { name: 'City', value: '', type: 'text' },
+        { name: 'State', value: '', type: 'text' },
+        { name: 'Zip', value: '', type: 'number' }
+      ]
+    ]
+  })
 
   connectedCallback() {
     this.$root.addEventListener('hi', this.hi)
@@ -16,31 +28,17 @@ export default class HomeView {
     this.$root.removeEventListener('hi', this.hi)
   }
 
+  get id() {
+    return this.$route.params.id
+  }
+
   render() {
     return (
-      <div>
-      <strong data-if={this.id || this.paramsMessage}>
-        <span data-if={this.id}>Id: {this.id}.</span>
-        <span data-if={this.paramsMessage}>
-          Params message: {this.paramsMessage}
-        </span>
-      </strong>
-        <button style="margin-right: auto" onclick={() => this.$go('/test/3')}>
-          test: 3
-        </button>
-      <p>
-        <input type="text" oninput={(e) => this.paramsMessage = e.target.value} />
-        {this.paramsMessage}
-        <button id="params-btn" onclick={() => this.navigate()}>
-          examples: {this.paramsMessage}
-        </button>
-        </p>
-        <code-editor></code-editor>
-        <button id="button" onclick={() => this.$emit('hi', 'hi')}>hi</button>
-        <span data-if={this.paramsMessage}>
-          {this.paramsMessage}
-        </span>
-      </div>
+      <app-content title-text={this.title}>
+        <div class="container">
+          <form-component fields={this.fields} />
+        </div>
+      </app-content>
     )
   }
 
@@ -52,6 +50,16 @@ export default class HomeView {
   }
 
   hi(e) {
-    return this.$root.shadowRoot.firstElementChild.prepend(e.detail)
+    return this.$root.shadowRoot.firstElementChild.append(e.detail)
+  }
+
+  get styles() {
+    return (
+      `
+      .container {
+        display: grid;
+        grid-row-gap: 18px;
+      }`
+    )
   }
 }

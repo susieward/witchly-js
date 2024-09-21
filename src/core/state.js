@@ -18,7 +18,7 @@ class StateManager {
   #mutations
   #actions
 
-  constructor(options, callback) {
+  constructor(options) {
     this.#state = new AppState(options?.state || {})
     this.#mutations = options?.mutations || {}
     this.#actions = options?.actions || {}

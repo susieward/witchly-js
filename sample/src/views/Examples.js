@@ -7,27 +7,34 @@ export default class Examples {
   components = { TextColors, ListItems, CodeEditor }
   title = 'Examples'
   state = () => ({
-    items: [],
-    message: '',
-    examples: [
+      items: [],
+      message: '',
+      examples: [
       {
-        title: 'Text Colors (1)',
+        title: 'Text Colors',
         config: { show: false },
-        get body() {
+        get content() {
           return <text-colors></text-colors>
         }
       },
       {
-        title: 'CodeEditor',
+        title: 'Text Colors (2)',
         config: { show: false },
-        get body() {
+        get content() {
+          return <text-colors></text-colors>
+        }
+      },
+      {
+        title: 'Code Editor',
+        config: { show: false },
+        get content() {
           return <code-editor></code-editor>
         }
       },
       {
         title: 'List Items',
         config: { show: false },
-        get body() {
+        get content() {
           return (
             <div>
               <button onclick={() => this.addListItem('hello!')}>
@@ -41,36 +48,29 @@ export default class Examples {
             </div>
           )
         }
-      },
-      {
-        title: 'Text Colors (2)',
-        config: { show: false },
-        get body() {
-          return <text-colors></text-colors>
-        }
       }
     ]
   })
 
   createdCallback() {
     this.addListItem('hello!')
-    if (this.$route.params?.show != null) {
+    console.log(this.items)
+    if (this.$route.params?.show !== null) {
       const comp = this.examples[Number(this.$route.params.show)]
-      comp.config.show = true
+      if (comp) comp.config.show = true
     }
   }
 
   render() {
     return (
-      <div>
+      <app-content title-text={this.title}>
       {this.$route.params.message}
-        <span data-if={Boolean(this.message)}>
-          {this.message}
-        </span>
+        {this.message && <p>{this.message}</p>}
+        <button onclick={() => this.closeAll()}>close all</button>
         <div id="examples">
           {this.comps}
         </div>
-      </div>
+      </app-content>
     )
   }
 
@@ -78,14 +78,10 @@ export default class Examples {
     return this.examples.map(comp => {
       return (
         <div class="example">
-          <span
-            class="link"
-            onclick={() => this.toggleComp(comp)}>
+          <h4 onclick={() => this.toggleComp(comp)}>
             {comp.title}
-          </span>
-          {(comp.config.show === true)
-            ? <div class="comp">{comp.body}</div>
-            : null}
+          </h4>
+          {comp.config.show && <div class="comp">{comp.content}</div>}
         </div>
       )
     })
@@ -95,11 +91,16 @@ export default class Examples {
     return comp.config.show = !comp.config.show
   }
 
+  closeAll() {
+    for (const comp of this.examples) {
+      comp.config.show = false
+    }
+  }
+
   addListItem(text) {
     let uuid = self.crypto.randomUUID()
     const index = uuid
     this.items.push(`${text} ${index}`)
-    console.log(this.items)
   }
 
   removeItem(index) {
@@ -109,21 +110,25 @@ export default class Examples {
 
   get styles() {
     return (`
-        .link {
-          color: var(--accent-color);
-          cursor: pointer;
-          margin-right: auto;
-        }
-
         #examples {
           display: grid;
+          align-content: flex-start;
+          grid-gap: 1rem;
+          grid-template-columns: repeat(auto-fit, minmax(20vw, 1fr));
         }
 
-        .comp {
-          border-left: 1px solid #eee;
-          padding: 0 0 0 20px;
-          margin-left: 5px;
-          margin-top: 10px;
+        h4 {
+          color: var(--accent-color);
+          cursor: pointer;
+          margin: 0 auto 0 0;
+          font-weight: 500;
+        }
+
+        .example {
+          border: var(--content-border);
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: auto;
         }
     `)
   }

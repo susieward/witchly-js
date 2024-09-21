@@ -1,11 +1,14 @@
 
 :root {
-  --bg-color: #F0F3F5;
+  --grey-light: #f6f6f7;
   --content-bg-color: #fff;
+
+  --bg-color: var(--grey-light);
   --content-border: 1px solid #ccc;
-  --accent-color: #8066cc;
+  --accent-color: lightcoral;
   --text-color: #3c3c43;
   --text-color-light: #626268;
+
   --text-font-size: 16px;
   --text-line-height: 32px;
   --font-family: 'system-ui';
@@ -19,10 +22,126 @@ body {
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: var(--text-line-height);
+  font-size: var(--text-font-size);
+  -webkit-text-size-adjust: 100%;
   color: var(--text-color);
   margin: 0;
   padding: 0;
+  background-color: var(--content-bg-color);
+}
+
+#app {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: minmax(150px, 22%) 1fr;
+  grid-column-gap: 2vw;
+}
+
+main {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  width: 100%;
+}
+
+.wrapper {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  max-width: 1440px;
+}
+
+h1 {
+  font-weight: 600;
+  font-style: normal;
+  font-size: 32px;
+  margin-top: 0;
+  padding: 0 0 12px 0;
+  letter-spacing: -.02em;
+  line-height: 46px;
+  color: var(--text-color);
+}
+
+p {
+  margin-top: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--accent-color);
+}
+
+a:hover {
+  color: var(--accent-color);
+}
+
+button {
+  background-color: transparent;
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  color: var(--accent-color);
+  padding: 6px 10px;
+  font-family: var(--font-family);
   font-size: var(--text-font-size);
-  line-height: var(--text-line-height);
+  cursor: pointer;
+  width: auto;
+}
+
+input {
+  background-color: #fff;
+  border: var(--content-border);
+  border-radius: 5px;
+  color: var(--text-color);
+  padding: 6px 10px;
+  font-family: var(--font-family);
+  font-size: var(--text-font-size);
+}
+
+input:focus {
+  outline-color: var(--accent-color);
+}
+
+.sidenav {
+  display: grid;
+  align-content: flex-start;
+  min-height: 100vh;
   background-color: var(--bg-color);
+  padding: 20px 30px;
+}
+
+.sidenav .container {
+  display: grid;
+  align-content: flex-start;
+  width: 100%;
+  max-width: 200px;
+  margin-left: auto;
+  padding: 30px 18px 0 0;
+}
+
+.links-container {
+  display: grid;
+  grid-gap: 8px;
+  border-top: 1px solid #ddd;
+  padding-top: 18px;
+}
+
+.sidenav .link {
+  color: var(--text-color-light);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.sidenav h1 {
+  font-weight: 300;
+  margin: 0;
+  padding-bottom: 8px;
+  font-size: 26px;
+  line-height: 36px;
+  letter-spacing: 0.02em;
+  color: var(--accent-color);
+  cursor: pointer;
 }

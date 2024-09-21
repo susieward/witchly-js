@@ -10,13 +10,11 @@ function initOptions(vm, callback) {
     const desc = descriptors[key]
     if (['template', 'render'].includes(key)) {
       _defineTemplate(desc, vm)
-    } else if (key === 'methods') {
-      _defineMethods(desc, vm)
     } else if ([...watchedProps, 'state', 'attrs', 'styles', 'constructor'].includes(key)) {
       continue
     } else if (staticProps.includes(key)) {
       _defineStaticProp(key, desc, vm)
-    } else if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
+    } else if (typeof desc.value === 'function') {
       _defineMethod(key, desc.value, vm)
     } else {
       Object.defineProperty(vm, key, desc)
@@ -33,7 +31,7 @@ function initOptions(vm, callback) {
     _defineWatchers(watchedProps, descriptors, vm)
   }
   if (descriptors.styles) {
-    _defineProp(descriptors.styles, vm, 'styles')
+    _defineProp(vm, 'styles', descriptors.styles)
   }
   return vm
 }
@@ -45,6 +43,23 @@ function _buildDescriptorsObject(options) {
     descriptors = { ...descriptors, ...prototypeDesc }
   }
   return descriptors
+}
+
+function _defineProp(vm, prop, desc) {
+  let val
+  let getter = null
+  if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
+    val = desc.value
+  } else if (desc.hasOwnProperty('get')) {
+    getter = desc.get
+  }
+  Object.defineProperty(vm, prop, {
+    get() {
+      return getter?.call(vm) || val.call(vm, vm)
+    },
+    enumerable: true,
+    configureable: true
+  })
 }
 
 function _defineTemplate(desc, vm) {
@@ -75,23 +90,6 @@ function _defineState(desc, vm, callback) {
     throw new Error('State function must return an object')
   }
   observe(obj, vm, callback)
-}
-
-function _defineProp(desc, vm, prop) {
-  let val
-  let getter = null
-  if (desc.hasOwnProperty('value') && typeof desc.value === 'function') {
-    val = desc.value
-  } else if (desc.hasOwnProperty('get')) {
-    getter = desc.get
-  }
-  Object.defineProperty(vm, prop, {
-    get() {
-      return getter?.call(vm) || val.call(vm, vm)
-    },
-    enumerable: true,
-    configureable: true
-  })
 }
 
 function _defineWatchers(watchedProps, descriptors, vm) {
@@ -132,9 +130,22 @@ function _defineAttrs(vm, options) {
   for (const attr of uniqueAttrs) {
     Object.defineProperty(vm, attr, {
       get() {
+        /*
+        if (vm._props[attr]) {
+          return vm._props[attr]
+        }
+        // return vm._props[attr]
+        */
         return vm.getAttribute(attr)
       },
       set(newVal) {
+        /*
+        if (vm._props[attr]) {
+          vm._props[attr] = newVal
+          return true
+        }
+        */
+        // vm._props[attr] = newVal
         return vm.setAttribute(attr, newVal)
       },
       enumerable: true,
@@ -150,21 +161,6 @@ function _defineStaticProp(key, desc, vm) {
     writeable: false,
     configureable: false
   })
-}
-
-function _defineMethods(desc, vm) {
-  if (desc?.value?.constructor?.name !== 'Object') {
-    throw new Error('Methods option must be an object')
-  }
-  const entries = Object.entries(desc.value)
-  for (const [key, val] of entries) {
-    Object.defineProperty(vm, key, {
-      value: function(...args) {
-        return val.apply(vm, [...args])
-      },
-      enumerable: true
-    })
-  }
 }
 
 function _defineMethod(key, value, vm) {

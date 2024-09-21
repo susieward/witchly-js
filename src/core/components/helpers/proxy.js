@@ -1,6 +1,6 @@
 
 class Observer {
-  constructor(obj, parent, callback, ref = null) {
+  constructor({ obj, parent, callback, ref = null }) {
     this._parent = parent
     this._callback = callback
     this._ref = ref
@@ -8,7 +8,7 @@ class Observer {
   }
 
   get refTarget() {
-    return this._ref ? this._parent._obj[this._ref] : null
+    return this._ref && this._parent._obj ? this._parent._obj[this._ref] : null
   }
 
   get parentEl() {
@@ -16,37 +16,37 @@ class Observer {
   }
 
   init(obj) {
-    obj = _buildObserverObj(this, obj)
+    const observedObj = _buildObservedObj(this, obj)
     const self = this
-    return new Proxy(obj, {
-      get(target, prop, receiver) {
+    return new Proxy(observedObj, {
+      get(target, prop) {
         if (prop === 'toJSON') {
           return () => target
         }
         return target[prop]
       },
-      async set(target, prop, value, receiver) {
+      async set(target, prop, value) {
         const oldVal = target[prop]
-        return await self._handler(target, prop, value, oldVal, receiver).catch(err => console.error(err))
+        return await self._handler(target, prop, value, oldVal).catch(err => console.error(err))
       }
     })
   }
 
-  async _handler(target, prop, newVal, oldVal, receiver) {
+  async _handler(target, prop, newVal, oldVal) {
     if (_shouldObserve(newVal)) {
-      const obs = new Observer(newVal, this, this._update, prop)
+      const obs = new Observer({ obj: newVal, parent: this, callback: this._update, ref: prop })
       newVal = obs._obj
     }
     if (this._ref) {
       let oldValue = null
       let oldValueStr = ''
-      const targetValue = this.refTarget
-      if (targetValue) {
-        oldValue = JSON.parse(JSON.stringify(targetValue))
+      const refValue = this.refTarget
+      if (refValue) {
+        oldValue = JSON.parse(JSON.stringify(refValue))
         oldValueStr = JSON.stringify(oldValue)
       }
       target[prop] = newVal
-      const newValueStr = JSON.stringify(targetValue)
+      const newValueStr = JSON.stringify(refValue)
       const sameVal = (newValueStr === oldValueStr)
       if (!sameVal) {
         await this._callback.call(this._parent, this._ref, JSON.parse(newValueStr), oldValue)
@@ -83,27 +83,39 @@ class Observer {
 
 function _shouldObserve(value) {
   return (['Object', 'Array'].includes(value?.constructor?.name))
+    || value instanceof Node
 }
 
-function _buildObserverObj(_obs, obj) {
-  const vm = _obs.parentEl
+function _isProxy(value) {
+  try {
+    structuredClone(value)
+  } catch (err) {
+    return err && err.code === 25
+  }
+  return false
+}
+
+function _buildObservedObj(obs, obj) {
+  const vm = obs.parentEl
   const descObj = Object.getOwnPropertyDescriptors(obj)
 
   for (const key of Object.keys(descObj)) {
     const desc = descObj[key]
     let value = desc.value
-    let obs = null
-    if (value && typeof value === 'object') {
-      if (!value.constructor.name.toLowerCase()?.includes('element')) {
-        obs = new Observer(value, _obs, _obs._update, key)
-        Object.defineProperty(obj, key, {
-          value: obs._obj,
-          enumerable: true,
-          configurable: true,
-          writable: true
-        })
-      }
-    } else if (desc.hasOwnProperty('get') && typeof desc.get !== 'undefined') {
+    if (_shouldObserve(value)) {
+      const _obs = new Observer({
+        obj: value, 
+        parent: obs, 
+        callback: obs._update, 
+        ref: key
+      })
+      Object.defineProperty(obj, key, {
+        value: _obs._obj,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      })
+    } else if (desc.get) {
       const getter = desc.get
       const value = getter.bind(vm)
       Object.defineProperty(obj, key, {
@@ -119,7 +131,7 @@ function _buildObserverObj(_obs, obj) {
 }
 
 function observe(obj, vm, callback) {
-  const obs = new Observer(obj, vm, callback)
+  const obs = new Observer({ obj, parent: vm, callback })
   const proxy = obs._obj
   const descMap = Object.keys(obj).map(key => {
     return [`${key}`, {

@@ -30,7 +30,7 @@ export default class ListItems {
   }
 
   get currentItems() {
-    if (!this.items) return
+    if (!Array.isArray(this.items)) return
     return this.items.map((item, i) => {
       return (
         <li

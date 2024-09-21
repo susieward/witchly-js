@@ -1,12 +1,11 @@
 
-async function update(prop, newVal, oldVal, vm) {
+async function updateDOM(prop, newVal, oldVal, vm) {
   const normalizedNewVal = _normalize(newVal)
   const normalizedOldVal = _normalize(oldVal)
   if (normalizedNewVal === normalizedOldVal) return
   // TO DO: address issue of dom changes in connectedCallback not being reflected
-  const oldDom = vm.shadowRoot.firstChild
+  const oldDom = vm.shadowRoot?.firstElementChild
   const newDom = await vm._parse()
-  newVal = null
 
   if (!newDom.isEqualNode(oldDom)) {
     compareNodes(newDom, oldDom)
@@ -39,21 +38,21 @@ function iterChildren(newEl, oldEl) {
 
   if (newChildren.length > oldChildren.length && (oldChildren.length > 0)) {
     const netNewChildren = newChildren.filter(child => {
-      const match = getNodeMatch(child, oldEl)
+      const match = _getNodeMatch(child, oldEl)
       return !match
     })
     if (netNewChildren.length > 0) {
       addedChildren.push(...netNewChildren)
-      newChildren = newChildren.filter(child => Boolean(getNodeMatch(child, oldEl)))
+      newChildren = newChildren.filter(child => Boolean(_getNodeMatch(child, oldEl)))
     }
   } else if (newChildren.length < oldChildren.length) {
     const subtractedChildren = oldChildren.filter(child => {
-      const match = getNodeMatch(child, newEl)
+      const match = _getNodeMatch(child, newEl)
       return !match
     })
     if (subtractedChildren.length > 0) {
       removedChildren.push(...subtractedChildren)
-      oldChildren = oldChildren.filter(child => Boolean(getNodeMatch(child, newEl)))
+      oldChildren = oldChildren.filter(child => Boolean(_getNodeMatch(child, newEl)))
     }
   }
 
@@ -74,8 +73,8 @@ function iterChildren(newEl, oldEl) {
       const oldNodeType = oldChild.nodeType
 
       if (newNodeType !== oldNodeType) {
-        const newNodeMatch = getNodeMatch(newChild, oldEl)
-        const oldNodeMatch = getNodeMatch(oldChild, newEl)
+        const newNodeMatch = _getNodeMatch(newChild, oldEl)
+        const oldNodeMatch = _getNodeMatch(oldChild, newEl)
         if (newNodeMatch) {
           if (!oldNodeMatch) {
             removedChildren.push(oldChild)
@@ -118,8 +117,8 @@ function appendOrInsert(newChild, parent) {
   const next = newChild.nextSibling
   const prev = newChild.previousSibling
 
-  const nextMatch = next ? getNodeMatch(next, parent) : null
-  const prevMatch = prev ? getNodeMatch(prev, parent) : null
+  const nextMatch = next ? _getNodeMatch(next, parent) : null
+  const prevMatch = prev ? _getNodeMatch(prev, parent) : null
 
   if (next && nextMatch) {
     if (prevMatch?.nextSibling?.nodeType === 3 && (newChild.nodeType === 3)) {
@@ -143,10 +142,9 @@ function appendOrInsert(newChild, parent) {
 }
 
 function processAttrs(newEl, oldEl) {
-  let attrs = newEl.getAttributeNames()
-  attrs = attrs.filter(attr => attr !== 'data-id')
+  const newAttrs = newEl.getAttributeNames().filter(attr => attr !== 'data-id')
 
-  for (const attr of attrs) {
+  for (const attr of newAttrs) {
     let newVal = _normalize(newEl.getAttribute(attr))
     let oldVal = _normalize(oldEl.getAttribute(attr))
 
@@ -163,7 +161,7 @@ function processAttrs(newEl, oldEl) {
 }
 
 function _normalize(val) {
-  if (val && typeof val === 'object') val = JSON.stringify(val)
+  if (val && typeof val === 'object' && !(val instanceof Node)) val = JSON.stringify(val)
   return val
 }
 
@@ -180,7 +178,7 @@ function _shouldCompareNodes(newNode, oldNode) {
   return true
 }
 
-function getNodeMatch(node, targetDom) {
+function _getNodeMatch(node, targetDom) {
   let match = null
   if (node?.nodeType === 1) {
     match = targetDom.querySelector(`${node.localName}[data-id=${node.dataset.id}]`)
@@ -203,14 +201,14 @@ function getNodeMatch(node, targetDom) {
       }
     }
     if (nodes.length > 0 && matches.length > 0) {
-      const sameNodeVal = matches.find(m => areTextNodesEqual(m, node))
+      const sameNodeVal = matches.find(m => _areTextNodesEqual(m, node))
       if (sameNodeVal) match = sameNodeVal
     }
   }
   return match
 }
 
-function areTextNodesEqual(node1, node2) {
+function _areTextNodesEqual(node1, node2) {
   if (node1 && node2) {
     const val1 = node1.nodeValue
     const val2 = node2.nodeValue
@@ -226,4 +224,4 @@ function _getXPathResults(exp, referenceNode, args = null) {
   return document.evaluate(exp, referenceNode, ...args)
 }
 
-export { update }
+export { updateDOM }

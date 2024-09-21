@@ -19,13 +19,12 @@ export default defineConfig({
           loader: 'jsx',
           jsx: 'automatic',
           jsxImportSource: 'witchly',
+          keepNames: true
         })
-      },
-      enforce: 'pre'
-    },
+      }
+    }
   ],
   optimizeDeps: {
-    force: true,
     esbuildOptions: {
       loader: { '.js': 'jsx' }
     }

@@ -1,8 +1,11 @@
 
 export default class CodeEditor {
-  defaultContent = '<p>Edit me!</p>'
+  name = 'code-editor'
   state = () => ({ outputHTML: '' })
 
+  bgColor = 'mistyrose'
+  color = 'salmon'
+  
   watch = {
     outputHTML: {
       handler(newVal) {
@@ -20,15 +23,18 @@ export default class CodeEditor {
 
   render() {
     return (
-      <div>
+      <section>
+        <div id="output"></div>
         <textarea
-          rows="10"
+          id="textarea"
+          value=""
           oninput={(e) => this.outputHTML = e.target.value}>
         </textarea>
-        <div id="output"></div>
-        <button onclick={() => this.reset()}>reset</button>
-        <p data-if={Boolean(this.outputHTML)}>hi</p>
-      </div>
+        <div style="display: grid; grid-auto-flow: column; grid-gap: 2rem; justify-content: flex-start;">
+          <button onclick={() => this.outputHTML = ''}>clear</button>
+          {this.showReset && <button onclick={() => this.reset()}>reset</button>}
+        </div>
+      </section>
     )
   }
 
@@ -36,27 +42,55 @@ export default class CodeEditor {
     this.outputHTML = this.defaultContent
   }
 
+  get showReset() {
+    return this.outputHTML !== this.defaultContent
+  }
+
   get textarea() {
-    return this.$querySelector('textarea')
+    return this.$querySelector('#textarea')
   }
 
   get output() {
     return this.$querySelector('#output')
   }
 
+  get defaultContent() {
+    return this.$route.name !== 'Test'
+      ? (
+`<div id="editor">
+  <h2>Hello</h2>
+  <p>Some example text</p>
+</div>
+
+<style>
+  #editor {
+    background-color: ${this.bgColor};
+    display: grid;
+    align-content: space-between;
+    color: ${this.color}; 
+    padding: 20px; 
+    border-radius: 8px;
+  }
+  #editor h2 {
+    margin: 0;
+  }
+</style>`)
+    : ''
+  }
+
   get styles() {
     return {
       textarea: {
         display: 'block',
-        minHeight: '200px',
+        minHeight: '370px',
         width: '100%',
-        maxWidth: '800px',
         border: '1px solid #eee',
         borderRadius: '0.3em',
         margin: '20px 0',
         padding: '20px',
         letterSpacing: '0.03em',
-        fontSize: '16px'
+        fontSize: '16px',
+        fontFamily: 'var(--font-family)'
       },
       ul: {
         listStyleType: '~ ',

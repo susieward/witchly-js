@@ -17,7 +17,7 @@ function createElementJSX(tag, props = {}, ...children) {
     } else if (name !== 'children') {
       const val = (value?.constructor?.name !== 'String')
         ? JSON.stringify(value)
-        : value?.toString() || ''
+        : value
       element.setAttribute(name, val)
     }
   }
@@ -31,7 +31,7 @@ async function _appendChild(parent, child) {
   if (!child) {
     return
   } else if (Array.isArray(child)) {
-    await Promise.all(child.map(c => _appendChild(parent, c)))
+    await Promise.all(child.map(c => _appendChild(parent, c))).catch(err => console.error(err))
   } else if (['Promise', 'AsyncFunction'].includes(child?.constructor?.name)) {
     await child.then(c => _appendChild(parent, c))
   } else {

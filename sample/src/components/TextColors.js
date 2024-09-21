@@ -1,8 +1,12 @@
 
 export default class TextColors {
+  name = 'text-colors'
   state = () => ({
     color: '',
-    colors: ['pink', 'slateblue', 'skyblue', 'turquoise', 'hotpink']
+    colors: [
+      'pink', 'slateblue', 'skyblue', 'turquoise', 
+      'hotpink', 'darkturquoise'
+    ]
   })
 
   createdCallback() {
@@ -11,28 +15,32 @@ export default class TextColors {
 
   render() {
     return (
-      <div style="display: grid; justify-content: flex-start;">
+      <div style="display: grid;">
         <span class="color">
           I'm some text!
         </span>
         <div>
         Text colors (click to change):
         <map-items
+          class="buttons"
           items={this.colors}
           callback={(color) => {
             return (
-              <button style={`color: ${color}; border: 1px solid ${color}`}
-            onclick={() => this.color = color}>
-            {color}
-          </button>
+                <button
+                  style={`color: ${color}; border: 1px solid ${color}`}
+                  onclick={() => this.color = color}>
+                  {color}
+                </button>
             )
           }}>
           </map-items>
           <p>Current color: <span class="color">{this.color}</span></p>
-          <input id="new-color" type="text" value="" />
-          <button onclick={() => this.addColor()}>
-            add color
-          </button>
+          <div>
+            <input id="new-color" type="text" value="" />
+            <button onclick={() => this.addColor()}>
+              add color
+            </button>
+          </div>
           <p>
             <button onclick={() => this.randomColor()}>
               random text color
@@ -44,30 +52,25 @@ export default class TextColors {
     )
   }
 
-  get colorsList() {
-    return this.colors.map(color => {
-      return (
-        <li>
-          <button
-            style={`color: ${color}; border: 1px solid ${color}`}
-            onclick={() => this.color = color}>
-            {color}
-          </button>
-        </li>
-      )
-    })
-  }
-
   get localStyles() {
     return (
       `li {
         width: auto;
       }
 
+      .buttons {
+        display: grid;
+        max-width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(min-content, 100px));
+        grid-gap: 10px;
+        margin: 10px 0;
+      }
+
       .color-text {
         display: inline-block;
         margin-right: 10px;
       }
+
       .color {
         display: inline-block;
         margin-right: 10px;

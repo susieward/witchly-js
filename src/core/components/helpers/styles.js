@@ -1,4 +1,6 @@
-import { _resolve, mapKeys } from './utils'
+import { toKebabCase } from './utils'
+
+const mapKeys = (obj) => Object.keys(obj).map(k => `${toKebabCase(k)}: ${obj[k]};`)
 
 const toCSSText = (styleMap) => {
   return Object.entries(styleMap).map(([key, val]) => {
@@ -16,13 +18,12 @@ class StyleSheet extends CSSStyleSheet {
   }
 }
 
-async function initStyles(vm, styleOption, doc) {
-  const resolvedStyles = await _resolve(styleOption)
-  let styles = [resolvedStyles].filter(result => Boolean(result))
+function initStyles(vm, doc) {
+  let styles = [vm.styles].filter(r => Boolean(r))
   const parentStyles = _resolveParentStyles(vm, doc)
 
   if (parentStyles.length > 0) {
-    styles = [...styles, ...parentStyles]
+    styles = [...parentStyles, ...styles]
   }
   if (styles.length > 0) {
     styles = styles.map(val => {

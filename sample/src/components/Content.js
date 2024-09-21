@@ -1,25 +1,25 @@
 export default {
   name: 'app-content',
-  render() {
+  render: (vm) => {
+    const title = vm['title-text']
     return (
-      <div class="content">
-        <h2>{this['title-text']}</h2>
+      <article class="content-container">
+        {title && <h1>{title}</h1>}
         <slot></slot>
-      </div>
+      </article>
     )
   },
   get styles() {
     return (`
-      .content {
+      .content-container {
         display: grid;
-        width: 100%;
-        max-width: 900px;
         background-color: var(--content-bg-color);
-        box-shadow: 0 6px 8px rgb(85 102 119 / 3%), 0 1px 1px rgb(85 102 119 / 40%);
-        background-color: #fff;
-        border: 1px solid transparent;
-        border-radius: 5px;
-        padding: 28px 35px 30px 35px;
+        padding: 0 1em;
+        width: 100%;
+        max-width: 60vw;
+      }
+      .content-container h1 {
+        border-bottom: 1px solid #eee;
       }`
     )
   }

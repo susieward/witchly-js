@@ -2,38 +2,30 @@
 const Title = (props) => {
   return (
     <div class="title-container">
-      <h1 style="color: #745fb5; cursor: pointer" onclick={() => props.onclick()}>
-        witchly.js
-      </h1>
       <h2 style="color: #aaa">{props.text}</h2>
     </div>
   )
 }
 
-export default class AppHeader {
+export default class Header {
+  name = 'app-header'
+  placeholder = 'Type something'
   state = () => ({ textVal: '' })
-  defaultTitle = 'lightweight, hyper-flexible web components'
-
-  connectedCallback() {
-    this.inputEl.placeholder = 'Type something'
-  }
 
   render() {
     return (
-      <header id="header">
-        <Title
-          onclick={() => this.$go('/')}
-          text={this.textVal || this.defaultTitle}>
-        </Title>
+      <header>
+        <Title text={this.textVal || this.message} />
         <div class="header-right">
-        {this.textVal}
-        <button onclick={() => this.$router.push({ name: 'Home'})}>home</button>
-          <input id="input" type="text" oninput={(e) => this.textVal = e.target.value} />
-          <button
-            data-if={this.clearable}
-            onclick={() => this.clear()}>
-            reset
-          </button>
+          {this.textVal}
+          <input
+            id="input" 
+            type="text"
+            value={this.textVal}
+            placeholder={this.placeholder}
+            oninput={(e) => this.textVal = e.target.value} 
+          />
+          {this.clearable && <button onclick={() => this.clear()}>reset</button>}
         </div>
       </header>
     )
@@ -50,19 +42,17 @@ export default class AppHeader {
   clear() {
     this.textVal = ''
     this.inputEl.value = ''
-    this.inputEl.placeholder = 'Type something'
   }
 
   get styles() {
     return (`
-      #header {
+      header {
         display: grid;
         max-width: 100%;
         height: auto;
         letter-spacing: 0.03em;
         grid-auto-flow: column;
         align-content: center;
-        background-color: var(--content-bg-color);
         padding: 20px 30px;
       }
 
@@ -83,14 +73,14 @@ export default class AppHeader {
         grid-column-gap: 15px;
       }
       
-      #header h2 {
+      h2 {
         font-weight: 300;
         padding: 0;
         margin: 0;
         font-size: 20px;
         letter-spacing: 0.03em;
         line-height: 32px;
-      }`
-    )
+      }
+    `)
   }
 }
