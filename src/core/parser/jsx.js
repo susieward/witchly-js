@@ -17,7 +17,7 @@ function createElementJSX(tag, props = {}, ...children) {
     } else if (name !== 'children') {
       const val = (value?.constructor?.name !== 'String')
         ? JSON.stringify(value)
-        : value
+        : value?.toString() || ''
       element.setAttribute(name, val)
     }
   }
